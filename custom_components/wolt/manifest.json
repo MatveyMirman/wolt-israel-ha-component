@@ -1,14 +1,15 @@
 {
     "domain": "wolt",
     "name": "Wolt",
-    "codeowners": ["@your-github-username"],
+    "codeowners": ["@MatveyMirman"],
     "config_flow": true,
-    "documentation": "https://github.com/your-repo/wolt-isr-ha",
+    "documentation": "https://github.com/MatveyMirman/wolt-israel-ha-component",
     "integration_type": "hub",
     "iot_class": "cloud_polling",
-    "issue_tracker": "https://github.com/your-repo/wolt-isr-ha/issues",
+    "issue_tracker": "https://github.com/MatveyMirman/wolt-israel-ha-component/issues",
     "requirements": ["aiohttp>=3.9.0"],
     "version": "0.1.0",
+    "icon": "mdi:food",
     "volumetrics": {
         "standard_connectors": {
             "available": ["sensor", "binary_sensor", "button"]
