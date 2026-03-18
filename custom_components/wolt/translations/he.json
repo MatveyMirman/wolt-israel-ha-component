@@ -1,0 +1,76 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "Wolt - משלוחים",
+                "description": "הגדרת מסעדה למעקב.",
+                "data": {
+                    "slug": "קישור המסעדה",
+                    "city": "עיר",
+                    "country": "מדינה",
+                    "delivery_method": "סוג משלוח"
+                },
+                "data_description": {
+                    "slug": "הקישור של המסעדה מכתובת Wolt (לדוגמה: 'gdb' מכתובת wolt.com/isr/tel-aviv/venue/gdb)",
+                    "city": "העיר בכתובת Wolt (לדוגמה: 'tel-aviv')",
+                    "country": "קוד המדינה (לדוגמה: 'isr')"
+                }
+            }
+        },
+        "errors": {
+            "already_configured": "מסעדה זו כבר מוגדרת",
+            "no_location": "לא הוגדרה מיקום בית ב-Home Assistant. אנא הגדר את מיקום הבית בהגדרות > מערכת > כללי.",
+            "invalid_slug": "קישור מסעדה לא תקין"
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "title": "אפשרויות Wolt",
+                "description": "הגדרת אפשרויות האינטגרציה.",
+                "data": {
+                    "polling_interval": "מרווח עדכון (שניות)"
+                },
+                "data_description": {
+                    "polling_interval": "באיזו תדירות לבדוק את סטטוס המסעדה (60-3600 שניות)"
+                }
+            }
+        }
+    },
+    "entity": {
+        "sensor": {
+            "status_text": {
+                "name": "סטטוס",
+                "description": "טקסט סטטוס נוכחי של המסעדה"
+            },
+            "delivery_time": {
+                "name": "זמן משלוח",
+                "description": "זמן משלוח משוער"
+            },
+            "delivery_fee": {
+                "name": "דמי משלוח",
+                "description": "סכום דמי המשלוח"
+            }
+        },
+        "binary_sensor": {
+            "availability": {
+                "name": "זמינות",
+                "description": "האם המסעדה זמינה כרגע"
+            }
+        },
+        "button": {
+            "order": {
+                "name": "הזמן ב-Wolt",
+                "description": "פתח את Wolt לביצוע הזמנה"
+            }
+        }
+    },
+    "state": {
+        "attributes": {
+            "venue_id": "מזהה מסעדה",
+            "next_open": "פתיחה הבאה",
+            "next_close": "סגירה הבאה",
+            "delivery_fee_cents": "דמי משלוח (אגורות)"
+        }
+    }
+}

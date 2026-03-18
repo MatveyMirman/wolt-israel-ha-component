@@ -1,0 +1,76 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "Wolt Venue",
+                "description": "Set up a Wolt venue to track.",
+                "data": {
+                    "slug": "Venue Slug",
+                    "city": "City",
+                    "country": "Country",
+                    "delivery_method": "Delivery Method"
+                },
+                "data_description": {
+                    "slug": "The venue slug from the Wolt URL (e.g., 'gdb' from wolt.com/isr/tel-aviv/venue/gdb)",
+                    "city": "The city in the Wolt URL (e.g., 'tel-aviv')",
+                    "country": "The country code (e.g., 'isr')"
+                }
+            }
+        },
+        "errors": {
+            "already_configured": "This venue is already configured",
+            "no_location": "No home location set in Home Assistant. Please configure your home location in Settings > System > General.",
+            "invalid_slug": "Invalid venue slug"
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "title": "Wolt Options",
+                "description": "Configure Wolt integration options.",
+                "data": {
+                    "polling_interval": "Polling Interval (seconds)"
+                },
+                "data_description": {
+                    "polling_interval": "How often to check venue status (60-3600 seconds)"
+                }
+            }
+        }
+    },
+    "entity": {
+        "sensor": {
+            "status_text": {
+                "name": "Status",
+                "description": "Current venue status text"
+            },
+            "delivery_time": {
+                "name": "Delivery Time",
+                "description": "Estimated delivery time"
+            },
+            "delivery_fee": {
+                "name": "Delivery Fee",
+                "description": "Delivery fee amount"
+            }
+        },
+        "binary_sensor": {
+            "availability": {
+                "name": "Availability",
+                "description": "Whether the venue is currently available"
+            }
+        },
+        "button": {
+            "order": {
+                "name": "Order on Wolt",
+                "description": "Open Wolt to place an order"
+            }
+        }
+    },
+    "state": {
+        "attributes": {
+            "venue_id": "Venue ID",
+            "next_open": "Next Open",
+            "next_close": "Next Close",
+            "delivery_fee_cents": "Delivery Fee (agorot)"
+        }
+    }
+}
