@@ -17,16 +17,26 @@ Currently optimized for **Israel** (country code: `isr`) with Tel Aviv as the de
 
 ## Installation
 
+### HACS Installation (Recommended)
+
+1. Make sure you have [HACS](https://hacs.xyz/) installed
+2. Go to **HACS → Integrations**
+3. Click the three dots menu → **Custom repositories**
+4. Add repository: `MatveyMirman/wolt-israel-ha-component`
+5. Category: **Integration**
+6. Click **Add**
+7. Search for "Wolt" in HACS integrations and install
+8. Restart Home Assistant
+9. Go to **Settings → Devices & Services → Add Integration**
+10. Search for "Wolt" and click to configure
+
 ### Manual Installation
 
-1. Copy the `custom_components/wolt` folder to your Home Assistant's `config/custom_components/` directory
-2. Restart Home Assistant
-3. Go to **Settings → Devices & Services → Add Integration**
-4. Search for "Wolt" and click to configure
-
-### HACS Installation (Future)
-
-> HACS support coming soon.
+1. Download the `wolt` folder from this repository
+2. Copy it to your Home Assistant's `config/custom_components/` directory
+3. Restart Home Assistant
+4. Go to **Settings → Devices & Services → Add Integration**
+5. Search for "Wolt" and click to configure
 
 ## Configuration
 
@@ -128,7 +138,7 @@ The delivery fee depends on your location. Make sure your Home Assistant home lo
 
 ## Contributing
 
-Issues and pull requests welcome on [GitHub](https://github.com/your-repo/wolt-isr-ha).
+Issues and pull requests welcome on [GitHub](https://github.com/MatveyMirman/wolt-israel-ha-component).
 
 ## Disclaimer
 
