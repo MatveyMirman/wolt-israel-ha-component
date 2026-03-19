@@ -17,7 +17,7 @@
                 }
             }
         },
-        "errors": {
+        "error": {
             "already_configured": "This venue is already configured",
             "no_location": "No home location set in Home Assistant. Please configure your home location in Settings > System > General.",
             "invalid_slug": "Invalid venue slug"

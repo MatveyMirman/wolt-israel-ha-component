@@ -9,10 +9,5 @@
     "issue_tracker": "https://github.com/MatveyMirman/wolt-israel-ha-component/issues",
     "requirements": ["aiohttp>=3.9.0"],
     "version": "0.1.0",
-    "icon": "mdi:food",
-    "volumetrics": {
-        "standard_connectors": {
-            "available": ["sensor", "binary_sensor", "button"]
-        }
-    }
+    "icon": "mdi:food"
 }

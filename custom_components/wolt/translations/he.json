@@ -17,7 +17,7 @@
                 }
             }
         },
-        "errors": {
+        "error": {
             "already_configured": "מסעדה זו כבר מוגדרת",
             "no_location": "לא הוגדרה מיקום בית ב-Home Assistant. אנא הגדר את מיקום הבית בהגדרות > מערכת > כללי.",
             "invalid_slug": "קישור מסעדה לא תקין"

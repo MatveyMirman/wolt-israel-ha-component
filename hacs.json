@@ -1,10 +1,9 @@
 {
   "name": "Wolt Venue Status",
   "content_in_root": false,
-  "zip_release": true,
-  "filename": "wolt.zip",
+  "zip_release": false,
   "hide_default_branch": true,
-  "homeassistant": "2024.1.0",
+  "homeassistant": "2026.1.0",
   "render_readme": true,
   "description": "Track restaurant availability on Wolt"
 }
