@@ -5,10 +5,7 @@ from __future__ import annotations
 import logging
 from typing import Final
 
-import homeassistant.helpers.config_validation as config_util
-import voluptuous as vol
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_NAME
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
@@ -32,16 +29,6 @@ from .const import (
 PLATFORMS: Final = ["sensor", "binary_sensor", "button"]
 
 _LOGGER = logging.getLogger(__name__)
-
-CONFIG_SCHEMA = config_util.config_schema_with_docs(
-    DOMAIN,
-    {
-        vol.Required(CONF_SLUG): str,
-        vol.Optional(CONF_CITY, default=DEFAULT_CITY): str,
-        vol.Optional(CONF_COUNTRY, default=DEFAULT_COUNTRY): str,
-        vol.Optional(CONF_DELIVERY_METHOD, default=DEFAULT_DELIVERY_METHOD): str,
-    },
-)
 
 
 class WoltDataUpdateCoordinator(DataUpdateCoordinator[WoltVenueData | None]):
