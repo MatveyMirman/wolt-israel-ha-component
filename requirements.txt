@@ -1,0 +1,4 @@
+aiohttp>=3.8.1
+homeassistant>=2026.3.2
+voluptuous>=0.13.1
+pip>=26.0
