@@ -14,9 +14,6 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from . import WoltDataUpdateCoordinator
 from .const import (
     ATTR_DELIVERY_FEE,
-    ATTR_DELIVERY_FEE_FORMATTED,
-    ATTR_DELIVERY_TIME,
-    ATTR_STATUS_TEXT,
     CONF_SLUG,
     DOMAIN,
 )

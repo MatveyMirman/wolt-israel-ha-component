@@ -1,8 +1,10 @@
 """Wolt integration for Home Assistant."""
 
 from __future__ import annotations
+
 import logging
 from typing import Final
+
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
@@ -17,9 +19,6 @@ from .const import (
     CONF_LONGITUDE,
     CONF_POLLING_INTERVAL,
     CONF_SLUG,
-    DEFAULT_CITY,
-    DEFAULT_COUNTRY,
-    DEFAULT_DELIVERY_METHOD,
     DEFAULT_POLLING_INTERVAL,
     DOMAIN,
 )
@@ -87,7 +86,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         config_dict = hass.config.as_dict()
         lat = config_dict.get("latitude")
         lon = config_dict.get("longitude")
-        
+
         if lat is None or lon is None:
             _LOGGER.error("No home location configured in Home Assistant")
             return False

@@ -92,7 +92,6 @@ class WoltApiClient:
             Parsed WoltVenueData object
         """
         venue = data.get("venue", {})
-        venue_raw = data.get("venue_raw", {})
 
         online = venue.get("online", False)
 
@@ -117,9 +116,10 @@ class WoltApiClient:
             if method_status.get("delivery_method") == "UNAVAILABLE":
                 metadata = method_status.get("metadata", [])
                 for item in metadata:
-                    if item.get("type") == "LINK_WITH_ICON" and item.get(
-                        "link"
-                    ) == "DELIVERY_FEE":
+                    if (
+                        item.get("type") == "LINK_WITH_ICON"
+                        and item.get("link") == "DELIVERY_FEE"
+                    ):
                         delivery_fee_formatted = item.get("value")
                         delivery_fee = self._parse_fee(delivery_fee_formatted)
                         break

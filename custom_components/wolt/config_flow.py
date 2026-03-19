@@ -24,7 +24,6 @@ from .const import (
     DOMAIN,
 )
 
-
 USER_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_SLUG): str,
@@ -43,9 +42,7 @@ class WoltConfigFlow(ConfigFlow, domain=DOMAIN):
     VERSION = 1
     MINOR_VERSION = 1
 
-    async def async_step_user(
-        self, user_input: dict | None = None
-    ) -> FlowResult:
+    async def async_step_user(self, user_input: dict | None = None) -> FlowResult:
         """Handle the initial step."""
         errors: dict[str, str] = {}
 
@@ -82,8 +79,10 @@ class WoltConfigFlow(ConfigFlow, domain=DOMAIN):
     def _get_home_location(self) -> tuple:
         """Get home location from Home Assistant config."""
         config_dict = self.hass.config.as_dict()
-        if (config_dict.get("latitude") is not None and 
-            config_dict.get("longitude") is not None):
+        if (
+            config_dict.get("latitude") is not None
+            and config_dict.get("longitude") is not None
+        ):
             return (config_dict["latitude"], config_dict["longitude"])
         return (None, None)
 
@@ -100,9 +99,7 @@ class WoltOptionsFlow(OptionsFlow):
         """Initialize options flow."""
         self._config_entry = config_entry
 
-    async def async_step_init(
-        self, user_input: dict | None = None
-    ) -> FlowResult:
+    async def async_step_init(self, user_input: dict | None = None) -> FlowResult:
         """Manage the options."""
         if user_input is not None:
             return self.async_create_entry(title="", data=user_input)
