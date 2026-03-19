@@ -1,8 +1,5 @@
 {
   "name": "Wolt Venue Status",
   "hide_default_branch": true,
-  "filename": "wolt.zip",
-  "zip_release": true,
-  "homeassistant": "2026.3.2",
   "render_readme": true
 }
