@@ -4,6 +4,5 @@
   "filename": "wolt",
   "hide_default_branch": true,
   "homeassistant": "2026.3.2",
-  "render_readme": true,
-  "description": "Track restaurant availability on Wolt"
+  "render_readme": true
 }
