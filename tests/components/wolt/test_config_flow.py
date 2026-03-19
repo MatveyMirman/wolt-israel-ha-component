@@ -31,9 +31,10 @@ class TestWoltConfigFlow:
         """Test user step shows form."""
         flow = WoltConfigFlow()
         flow.hass = MagicMock()
-        flow.hass.config.location = MagicMock()
-        flow.hass.config.location.latitude = 32.0853
-        flow.hass.config.location.longitude = 34.7818
+        flow.hass.config.as_dict.return_value = {
+            "latitude": 32.0853,
+            "longitude": 34.7818,
+        }
 
         result = await flow.async_step_user()
 
@@ -49,9 +50,10 @@ class TestWoltConfigFlow:
         """Test that slug is normalized to lowercase."""
         flow = WoltConfigFlow()
         flow.hass = MagicMock()
-        flow.hass.config.location = MagicMock()
-        flow.hass.config.location.latitude = 32.0853
-        flow.hass.config.location.longitude = 34.7818
+        flow.hass.config.as_dict.return_value = {
+            "latitude": 32.0853,
+            "longitude": 34.7818,
+        }
         flow._async_current_entries = MagicMock(return_value=[])
 
         result = await flow.async_step_user({CONF_SLUG: "  GDB  "})
@@ -64,9 +66,10 @@ class TestWoltConfigFlow:
         """Test already configured error."""
         flow = WoltConfigFlow()
         flow.hass = MagicMock()
-        flow.hass.config.location = MagicMock()
-        flow.hass.config.location.latitude = 32.0853
-        flow.hass.config.location.longitude = 34.7818
+        flow.hass.config.as_dict.return_value = {
+            "latitude": 32.0853,
+            "longitude": 34.7818,
+        }
 
         existing_entry = MagicMock()
         existing_entry.data = {CONF_SLUG: "gdb"}
@@ -81,7 +84,10 @@ class TestWoltConfigFlow:
         """Test no location error."""
         flow = WoltConfigFlow()
         flow.hass = MagicMock()
-        flow.hass.config.location = None
+        flow.hass.config.as_dict.return_value = {
+            "latitude": None,
+            "longitude": None,
+        }
         flow._async_current_entries = MagicMock(return_value=[])
 
         result = await flow.async_step_user({CONF_SLUG: "gdb"})
@@ -92,9 +98,10 @@ class TestWoltConfigFlow:
         """Test getting home location."""
         flow = WoltConfigFlow()
         flow.hass = MagicMock()
-        flow.hass.config.location = MagicMock()
-        flow.hass.config.location.latitude = 32.0853
-        flow.hass.config.location.longitude = 34.7818
+        flow.hass.config.as_dict.return_value = {
+            "latitude": 32.0853,
+            "longitude": 34.7818,
+        }
 
         lat, lon = flow._get_home_location()
         assert lat == 32.0853
@@ -104,7 +111,10 @@ class TestWoltConfigFlow:
         """Test getting home location when not set."""
         flow = WoltConfigFlow()
         flow.hass = MagicMock()
-        flow.hass.config.location = None
+        flow.hass.config.as_dict.return_value = {
+            "latitude": None,
+            "longitude": None,
+        }
 
         lat, lon = flow._get_home_location()
         assert lat is None
@@ -115,9 +125,10 @@ class TestWoltConfigFlow:
         """Test complete user flow."""
         flow = WoltConfigFlow()
         flow.hass = MagicMock()
-        flow.hass.config.location = MagicMock()
-        flow.hass.config.location.latitude = 32.0853
-        flow.hass.config.location.longitude = 34.7818
+        flow.hass.config.as_dict.return_value = {
+            "latitude": 32.0853,
+            "longitude": 34.7818,
+        }
         flow._async_current_entries = MagicMock(return_value=[])
 
         user_input = {

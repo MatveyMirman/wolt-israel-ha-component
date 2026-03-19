@@ -81,8 +81,10 @@ class WoltConfigFlow(ConfigFlow, domain=DOMAIN):
 
     def _get_home_location(self) -> tuple:
         """Get home location from Home Assistant config."""
-        if self.hass.config.location is not None:
-            return (self.hass.config.location.latitude, self.hass.config.location.longitude)
+        config_dict = self.hass.config.as_dict()
+        if (config_dict.get("latitude") is not None and 
+            config_dict.get("longitude") is not None):
+            return (config_dict["latitude"], config_dict["longitude"])
         return (None, None)
 
     @staticmethod

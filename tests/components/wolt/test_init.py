@@ -69,7 +69,10 @@ async def test_async_setup_entry_no_location(mock_config_entry):
     """Test setup fails when no location is available."""
     mock_config_entry.data = {CONF_SLUG: "test-venue"}
     mock_hass = MagicMock()
-    mock_hass.config.location = None
+    mock_hass.config.as_dict.return_value = {
+        "latitude": None,
+        "longitude": None,
+    }
 
     result = await async_setup_entry(mock_hass, mock_config_entry)
 
@@ -82,9 +85,10 @@ async def test_async_setup_entry_adds_coordinates(mock_config_entry):
     mock_config_entry.data = {CONF_SLUG: "test-venue"}
     mock_hass = MagicMock()
     mock_hass.data = {}
-    mock_hass.config.location = MagicMock()
-    mock_hass.config.location.latitude = 32.0853
-    mock_hass.config.location.longitude = 34.7818
+    mock_hass.config.as_dict.return_value = {
+        "latitude": 32.0853,
+        "longitude": 34.7818,
+    }
     mock_hass.config_entries.async_update_entry = MagicMock()
     mock_hass.config_entries.async_forward_entry_setups = AsyncMock(return_value=True)
     mock_config_entry.async_on_unload = MagicMock()

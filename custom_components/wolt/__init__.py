@@ -84,10 +84,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Wolt integration from a config entry."""
 
     if CONF_LATITUDE not in entry.data or CONF_LONGITUDE not in entry.data:
-        if hass.config.location is not None:
-            lat = hass.config.location.latitude
-            lon = hass.config.location.longitude
-        else:
+        config_dict = hass.config.as_dict()
+        lat = config_dict.get("latitude")
+        lon = config_dict.get("longitude")
+        
+        if lat is None or lon is None:
             _LOGGER.error("No home location configured in Home Assistant")
             return False
 
