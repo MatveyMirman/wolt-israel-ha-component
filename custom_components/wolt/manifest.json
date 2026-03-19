@@ -5,7 +5,6 @@
         "@MatveyMirman"
     ],
     "config_flow": true,
-    "country": "IL",
     "dependencies": [],
     "documentation": "https://github.com/MatveyMirman/wolt-israel-ha-component",
     "icon": "mdi:food",
@@ -16,5 +15,5 @@
         "aiohttp>=3.9.0",
         "voluptuous>=0.13.0"
     ],
-    "version": "0.1.5"
+    "version": "0.1.6"
 }
