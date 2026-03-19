@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from datetime import timedelta
 from typing import Final
 
 from homeassistant.config_entries import ConfigEntry
@@ -51,7 +52,7 @@ class WoltDataUpdateCoordinator(DataUpdateCoordinator[WoltVenueData | None]):
             hass,
             _LOGGER,
             name=f"Wolt {self._slug}",
-            update_interval=polling_interval,
+            update_interval=timedelta(seconds=polling_interval),
         )
 
         session = async_get_clientsession(hass)
