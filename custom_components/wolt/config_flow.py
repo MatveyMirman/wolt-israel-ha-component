@@ -4,9 +4,9 @@ import voluptuous as vol
 from homeassistant.config_entries import (
     ConfigEntry,
     ConfigFlow,
-    ConfigFlowResult,
     OptionsFlow,
 )
+from homeassistant.data_entry_flow import FlowResult
 
 from .const import (
     CONF_CITY,
@@ -44,7 +44,7 @@ class WoltConfigFlow(ConfigFlow):
 
     async def async_step_user(
         self, user_input: dict | None = None
-    ) -> ConfigFlowResult:
+    ) -> FlowResult:
         """Handle the initial step."""
         errors: dict[str, str] = {}
 
@@ -100,7 +100,7 @@ class WoltOptionsFlow(OptionsFlow):
 
     async def async_step_init(
         self, user_input: dict | None = None
-    ) -> ConfigFlowResult:
+    ) -> FlowResult:
         """Manage the options."""
         if user_input is not None:
             return self.async_create_entry(title="", data=user_input)
