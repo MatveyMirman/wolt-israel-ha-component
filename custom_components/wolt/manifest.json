@@ -1,13 +1,20 @@
 {
     "domain": "wolt",
     "name": "Wolt",
-    "codeowners": ["@MatveyMirman"],
+    "codeowners": [
+        "@MatveyMirman"
+    ],
     "config_flow": true,
+    "country": "IL",
+    "dependencies": [],
     "documentation": "https://github.com/MatveyMirman/wolt-israel-ha-component",
+    "icon": "mdi:food",
     "integration_type": "hub",
     "iot_class": "cloud_polling",
     "issue_tracker": "https://github.com/MatveyMirman/wolt-israel-ha-component/issues",
-    "requirements": ["aiohttp>=3.9.0"],
-    "version": "0.1.4",
-    "icon": "mdi:food"
+    "requirements": [
+        "aiohttp>=3.9.0",
+        "voluptuous>=0.13.0"
+    ],
+    "version": "0.1.5"
 }
