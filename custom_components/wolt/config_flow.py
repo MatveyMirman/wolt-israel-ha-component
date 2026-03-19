@@ -1,19 +1,12 @@
 """Config flow for Wolt integration."""
 
-from __future__ import annotations
-
-from typing import TYPE_CHECKING
-
-import homeassistant.helpers.config_validation as config_util
 import voluptuous as vol
 from homeassistant.config_entries import (
-    CONN_CLASS_CLOUD_POLLING,
     ConfigEntry,
     ConfigFlow,
+    ConfigFlowResult,
     OptionsFlow,
 )
-from homeassistant.core import HomeAssistant
-from homeassistant.data_entry_flow import FlowResult
 
 from .const import (
     CONF_CITY,
@@ -30,9 +23,6 @@ from .const import (
     DELIVERY_METHODS,
     DOMAIN,
 )
-
-if TYPE_CHECKING:
-    from homeassistant.config_entries import ConfigFlow
 
 
 USER_SCHEMA = vol.Schema(
@@ -51,11 +41,10 @@ class WoltConfigFlow(ConfigFlow):
     """Handle a config flow for Wolt."""
 
     VERSION = 1
-    CONNECTION_CLASS = CONN_CLASS_CLOUD_POLLING
 
     async def async_step_user(
         self, user_input: dict | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Handle the initial step."""
         errors: dict[str, str] = {}
 
@@ -106,11 +95,12 @@ class WoltOptionsFlow(OptionsFlow):
 
     def __init__(self, config_entry: ConfigEntry) -> None:
         """Initialize options flow."""
+        super().__init__()
         self.config_entry = config_entry
 
     async def async_step_init(
         self, user_input: dict | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Manage the options."""
         if user_input is not None:
             return self.async_create_entry(title="", data=user_input)
