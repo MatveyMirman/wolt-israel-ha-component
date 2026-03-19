@@ -1,0 +1,25 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "Wolt Venue",
+                "description": "Enter the Wolt venue slug from the venue URL (e.g., 'gdb' from wolt.com/isr/tel-aviv/venue/gdb)"
+            }
+        },
+        "error": {
+            "already_configured": "This venue is already configured",
+            "no_location": "Home location is not set in Home Assistant. Please set your home location in General settings."
+        },
+        "abort": {
+            "already_configured": "This venue is already configured"
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "title": "Wolt Options",
+                "description": "Configure polling settings"
+            }
+        }
+    }
+}

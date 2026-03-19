@@ -37,10 +37,11 @@ USER_SCHEMA = vol.Schema(
 )
 
 
-class WoltConfigFlow(ConfigFlow):
+class WoltConfigFlow(ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Wolt."""
 
     VERSION = 1
+    MINOR_VERSION = 1
 
     async def async_step_user(
         self, user_input: dict | None = None
@@ -95,8 +96,7 @@ class WoltOptionsFlow(OptionsFlow):
 
     def __init__(self, config_entry: ConfigEntry) -> None:
         """Initialize options flow."""
-        super().__init__()
-        self.config_entry = config_entry
+        self._config_entry = config_entry
 
     async def async_step_init(
         self, user_input: dict | None = None
@@ -109,7 +109,7 @@ class WoltOptionsFlow(OptionsFlow):
             {
                 vol.Optional(
                     CONF_POLLING_INTERVAL,
-                    default=self.config_entry.options.get(
+                    default=self._config_entry.options.get(
                         CONF_POLLING_INTERVAL, DEFAULT_POLLING_INTERVAL
                     ),
                 ): vol.All(vol.Coerce(int), vol.Range(min=60, max=3600)),
