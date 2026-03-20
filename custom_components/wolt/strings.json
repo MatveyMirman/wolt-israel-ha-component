@@ -7,8 +7,7 @@
                 "data": {
                     "hub_name": "Hub Name",
                     "hub_name_help": "A friendly name for this hub (e.g., 'Home', 'Office')",
-                    "location_type": "Location",
-                    "custom_address": "Custom Address"
+                    "location_type": "Location"
                 }
             },
             "venues": {
@@ -18,11 +17,12 @@
         },
         "error": {
             "already_configured": "This hub is already configured",
-            "no_location": "Home location is not set in Home Assistant. Please set your home location in General settings, or enter a custom address.",
+            "no_location": "Home location is not set in Home Assistant. Please set your home location in General settings or add a zone with coordinates.",
             "no_venues": "Please add at least one venue slug"
         },
         "abort": {
-            "already_configured": "This hub is already configured"
+            "already_configured": "This hub is already configured",
+            "no_location": "Home location is not set in Home Assistant. Please set your home location in General settings or add a zone with coordinates."
         }
     },
     "options": {

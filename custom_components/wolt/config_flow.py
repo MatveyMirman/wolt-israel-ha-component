@@ -8,10 +8,8 @@ from homeassistant.config_entries import (
     ConfigFlow,
     OptionsFlow,
 )
-from homeassistant.helpers import selector
 
 from .const import (
-    CONF_ADDRESS,
     CONF_DELIVERY_METHOD,
     CONF_HUB_ID,
     CONF_HUB_NAME,
@@ -38,84 +36,73 @@ class WoltConfigFlow(ConfigFlow, domain=DOMAIN):
     async def async_step_user(self, user_input: dict | None = None) -> ConfigFlow:
         """Handle the initial step - configure hub."""
         errors: dict[str, str] = {}
+        zones = self._get_zones()
+        home_lat, home_lon = self._get_home_location()
 
         if user_input is not None:
             hub_name = user_input.get(CONF_HUB_NAME, DEFAULT_HUB_NAME)
-            lat = None
-            lon = None
-            zone_name = None
             location_type = user_input.get("location_type", "home")
 
-            if location_type == "custom":
-                address = user_input.get(CONF_ADDRESS, {})
-                lat = address.get("latitude")
-                lon = address.get("longitude")
-                zone_name = "Custom Address"
-            elif location_type == "home":
-                home_lat, home_lon = self._get_home_location()
+            if location_type == "home":
                 if home_lat is None or home_lon is None:
                     errors["base"] = "no_location"
-                    return self.async_show_form(
-                        step_id="user",
-                        data_schema=self._get_schema(user_input),
-                        errors=errors,
+                else:
+                    hub_id = str(uuid.uuid4())
+                    return self.async_create_entry(
+                        title=f"Wolt Hub - {hub_name}",
+                        data={
+                            CONF_HUB_ID: hub_id,
+                            CONF_HUB_NAME: hub_name,
+                            CONF_ZONE: "Home Assistant Home",
+                            CONF_LATITUDE: home_lat,
+                            CONF_LONGITUDE: home_lon,
+                            CONF_VENUES: [],
+                        },
                     )
-                lat = home_lat
-                lon = home_lon
-                zone_name = "Home Assistant Home"
             else:
-                zones = self._get_zones()
                 for zone in zones:
                     if zone["id"] == location_type:
-                        lat = zone["latitude"]
-                        lon = zone["longitude"]
-                        zone_name = zone["name"]
-                        break
+                        hub_id = str(uuid.uuid4())
+                        return self.async_create_entry(
+                            title=f"Wolt Hub - {hub_name}",
+                            data={
+                                CONF_HUB_ID: hub_id,
+                                CONF_HUB_NAME: hub_name,
+                                CONF_ZONE: zone["name"],
+                                CONF_LATITUDE: zone["latitude"],
+                                CONF_LONGITUDE: zone["longitude"],
+                                CONF_VENUES: [],
+                            },
+                        )
 
-            if not errors and lat is not None and lon is not None:
-                hub_id = str(uuid.uuid4())
-                return self.async_create_entry(
-                    title=f"Wolt Hub - {hub_name}",
-                    data={
-                        CONF_HUB_ID: hub_id,
-                        CONF_HUB_NAME: hub_name,
-                        CONF_ZONE: zone_name,
-                        CONF_LATITUDE: lat,
-                        CONF_LONGITUDE: lon,
-                        CONF_VENUES: [],
-                    },
-                )
+        if home_lat is None and not zones:
+            return self.async_abort(reason="no_location")
 
         return self.async_show_form(
             step_id="user",
-            data_schema=self._get_schema(user_input or {}),
+            data_schema=self._get_schema(user_input or {}, zones, home_lat),
             errors=errors,
             description_placeholders={
                 "hub_name_help": "A friendly name for this hub (e.g., 'Home', 'Office')",
             },
         )
 
-    def _get_schema(self, user_input: dict) -> vol.Schema:
+    def _get_schema(self, user_input: dict, zones: list, home_lat: float | None) -> vol.Schema:
         """Build the schema based on available options."""
-        zones = self._get_zones()
-        home_lat, _ = self._get_home_location()
-        
-        if zones or home_lat is not None:
-            location_options = {}
-            if home_lat is not None:
-                location_options["home"] = "Use Home Assistant Home Location"
-            for zone in zones:
-                location_options[f"area_{zone['id']}"] = f"Zone: {zone['name']}"
-            location_options["custom"] = "Enter Custom Address"
+        location_options = {}
+        default_location = "home"
 
-            return vol.Schema({
-                vol.Required(CONF_HUB_NAME, default=user_input.get(CONF_HUB_NAME, DEFAULT_HUB_NAME)): str,
-                vol.Required("location_type", default=user_input.get("location_type", "home")): vol.In(location_options),
-                vol.Optional(CONF_ADDRESS): selector.LocationSelectorConfig(),
-            })
-        
+        if home_lat is not None:
+            location_options["home"] = "Use Home Assistant Home Location"
+        else:
+            default_location = f"area_{zones[0]['id']}" if zones else "home"
+
+        for zone in zones:
+            location_options[f"area_{zone['id']}"] = f"Zone: {zone['name']}"
+
         return vol.Schema({
             vol.Required(CONF_HUB_NAME, default=user_input.get(CONF_HUB_NAME, DEFAULT_HUB_NAME)): str,
+            vol.Required("location_type", default=user_input.get("location_type", default_location)): vol.In(location_options),
         })
 
     def _get_home_location(self) -> tuple:

@@ -69,35 +69,23 @@ class TestWoltConfigFlow:
         assert result["data"][CONF_VENUES] == []
 
     @pytest.mark.asyncio
-    async def test_user_step_custom_address(self):
-        """Test that user step creates entry with custom address."""
+    async def test_user_step_no_location_aborts(self):
+        """Test that user step aborts when no location is available."""
         flow = WoltConfigFlow()
         flow.hass = MagicMock()
         flow.hass.config.as_dict.return_value = {
-            "latitude": 32.0853,
-            "longitude": 34.7818,
+            "latitude": None,
+            "longitude": None,
         }
 
-        user_input = {
-            CONF_HUB_NAME: "Office",
-            "location_type": "custom",
-            "address": {
-                "latitude": 32.0667,
-                "longitude": 34.7833,
-            },
-        }
+        result = await flow.async_step_user()
 
-        result = await flow.async_step_user(user_input)
-
-        assert result["type"] == FlowResultType.CREATE_ENTRY
-        assert result["title"] == "Wolt Hub - Office"
-        assert result["data"][CONF_ZONE] == "Custom Address"
-        assert result["data"][CONF_LATITUDE] == 32.0667
-        assert result["data"][CONF_LONGITUDE] == 34.7833
+        assert result["type"] == FlowResultType.ABORT
+        assert result["reason"] == "no_location"
 
     @pytest.mark.asyncio
-    async def test_user_step_no_location(self):
-        """Test no location error when home not set and no custom address."""
+    async def test_user_step_no_location_error(self):
+        """Test no location error when home not set and zones available."""
         flow = WoltConfigFlow()
         flow.hass = MagicMock()
         flow.hass.config.as_dict.return_value = {
