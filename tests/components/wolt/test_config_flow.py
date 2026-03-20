@@ -8,6 +8,7 @@ from homeassistant.config_entries import OptionsFlow
 
 from custom_components.wolt.config_flow import WoltConfigFlow, WoltOptionsFlow
 from custom_components.wolt.const import (
+    CONF_DELIVERY_METHOD,
     CONF_HUB_ID,
     CONF_HUB_NAME,
     CONF_LATITUDE,
@@ -109,8 +110,8 @@ class TestWoltConfigFlow:
         assert result["reason"] == "no_location"
 
     @pytest.mark.asyncio
-    async def test_user_step_no_home_location_error(self):
-        """Test no location error when home not set."""
+    async def test_user_step_no_home_location_aborts(self):
+        """Test that user step aborts when home not set and no zones."""
         flow = WoltConfigFlow()
         flow.hass = MagicMock()
         flow.hass.config.as_dict.return_value = {
@@ -118,14 +119,10 @@ class TestWoltConfigFlow:
             "longitude": None,
         }
 
-        user_input = {
-            CONF_HUB_NAME: "Test",
-            "location_type": "home",
-        }
+        result = await flow.async_step_user()
 
-        result = await flow.async_step_user(user_input)
-
-        assert result["errors"] == {"base": "no_location"}
+        assert result["type"] == FlowResultType.ABORT
+        assert result["reason"] == "no_location"
 
     def test_get_home_location(self):
         """Test getting home location."""
