@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from dataclasses import dataclass
 from datetime import timedelta
 from typing import Final
 
@@ -13,13 +14,14 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .api import WoltApiClient, WoltVenueData
 from .const import (
-    CONF_CITY,
-    CONF_COUNTRY,
     CONF_DELIVERY_METHOD,
+    CONF_HUB_ID,
+    CONF_HUB_NAME,
     CONF_LATITUDE,
     CONF_LONGITUDE,
     CONF_POLLING_INTERVAL,
     CONF_SLUG,
+    CONF_VENUES,
     DEFAULT_POLLING_INTERVAL,
     DOMAIN,
 )
@@ -29,20 +31,38 @@ PLATFORMS: Final = ["sensor", "binary_sensor", "button"]
 _LOGGER = logging.getLogger(__name__)
 
 
+@dataclass
+class WoltVenueConfig:
+    """Configuration for a single venue."""
+
+    slug: str
+    delivery_method: str
+
+
+@dataclass
+class WoltHubData:
+    """Data for a Wolt hub containing multiple venues."""
+
+    hub_id: str
+    hub_name: str
+    venues: dict[str, WoltVenueData]
+
+
 class WoltDataUpdateCoordinator(DataUpdateCoordinator[WoltVenueData | None]):
-    """Class to manage fetching Wolt data."""
+    """Class to manage fetching Wolt venue data."""
 
     def __init__(
         self,
         hass: HomeAssistant,
         entry: ConfigEntry,
+        venue_config: WoltVenueConfig,
     ) -> None:
         """Initialize the coordinator."""
         self.entry = entry
-        self._slug = entry.data[CONF_SLUG]
-        self._city = entry.data[CONF_CITY]
-        self._country = entry.data[CONF_COUNTRY]
-        self._delivery_method = entry.data[CONF_DELIVERY_METHOD]
+        self.venue_config = venue_config
+        self._slug = venue_config.slug
+        self._delivery_method = venue_config.delivery_method
+        self._hub_id = entry.data.get(CONF_HUB_ID, entry.entry_id)
 
         polling_interval = entry.options.get(
             CONF_POLLING_INTERVAL, DEFAULT_POLLING_INTERVAL
@@ -57,6 +77,16 @@ class WoltDataUpdateCoordinator(DataUpdateCoordinator[WoltVenueData | None]):
 
         session = async_get_clientsession(hass)
         self.api = WoltApiClient(session)
+
+    @property
+    def hub_id(self) -> str:
+        """Return the hub ID."""
+        return self._hub_id
+
+    @property
+    def hub_name(self) -> str:
+        """Return the hub name."""
+        return self.entry.data.get(CONF_HUB_NAME, "Wolt Hub")
 
     async def _async_update_data(self) -> WoltVenueData | None:
         """Fetch data from Wolt API."""
@@ -77,7 +107,7 @@ class WoltDataUpdateCoordinator(DataUpdateCoordinator[WoltVenueData | None]):
     @property
     def order_url(self) -> str:
         """Generate the Wolt order URL."""
-        return f"https://wolt.com/{self._country}/{self._city}/venue/{self._slug}"
+        return f"https://wolt.com/{self._slug}"
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -95,10 +125,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         new_data = {**entry.data, CONF_LATITUDE: lat, CONF_LONGITUDE: lon}
         hass.config_entries.async_update_entry(entry, data=new_data)
 
-    coordinator = WoltDataUpdateCoordinator(hass, entry)
-    await coordinator.async_config_entry_first_refresh()
-
-    hass.data.setdefault(DOMAIN, {})[entry.entry_id] = coordinator
+    hass.data.setdefault(DOMAIN, {})[entry.entry_id] = {
+        "entry": entry,
+        "coordinators": {},
+    }
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 

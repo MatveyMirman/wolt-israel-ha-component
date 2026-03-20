@@ -8,16 +8,15 @@ from homeassistant.config_entries import OptionsFlow
 
 from custom_components.wolt.config_flow import WoltConfigFlow, WoltOptionsFlow
 from custom_components.wolt.const import (
-    CONF_CITY,
-    CONF_COUNTRY,
-    CONF_DELIVERY_METHOD,
+    CONF_HUB_ID,
+    CONF_HUB_NAME,
     CONF_LATITUDE,
     CONF_LONGITUDE,
     CONF_POLLING_INTERVAL,
     CONF_SLUG,
-    DEFAULT_CITY,
-    DEFAULT_COUNTRY,
-    DEFAULT_DELIVERY_METHOD,
+    CONF_VENUES,
+    CONF_ZONE,
+    DEFAULT_HUB_NAME,
     DEFAULT_POLLING_INTERVAL,
     DOMAIN,
 )
@@ -40,30 +39,38 @@ class TestWoltConfigFlow:
 
         assert result["type"] == FlowResultType.FORM
         assert result["step_id"] == "user"
-        assert CONF_SLUG in result["data_schema"].schema
-        assert CONF_CITY in result["data_schema"].schema
-        assert CONF_COUNTRY in result["data_schema"].schema
-        assert CONF_DELIVERY_METHOD in result["data_schema"].schema
+        assert CONF_HUB_NAME in result["data_schema"].schema
+        assert "location_type" in result["data_schema"].schema
 
     @pytest.mark.asyncio
-    async def test_user_step_slug_normalized(self):
-        """Test that slug is normalized to lowercase."""
+    async def test_user_step_creates_entry(self):
+        """Test that user step creates entry with hub config."""
         flow = WoltConfigFlow()
         flow.hass = MagicMock()
         flow.hass.config.as_dict.return_value = {
             "latitude": 32.0853,
             "longitude": 34.7818,
         }
-        flow._async_current_entries = MagicMock(return_value=[])
 
-        result = await flow.async_step_user({CONF_SLUG: "  GDB  "})
+        user_input = {
+            CONF_HUB_NAME: "My Home",
+            "location_type": "home",
+        }
+
+        result = await flow.async_step_user(user_input)
 
         assert result["type"] == FlowResultType.CREATE_ENTRY
-        assert result["data"][CONF_SLUG] == "gdb"
+        assert result["title"] == "Wolt Hub - My Home"
+        assert CONF_HUB_ID in result["data"]
+        assert result["data"][CONF_HUB_NAME] == "My Home"
+        assert result["data"][CONF_ZONE] == "Home Assistant Home"
+        assert result["data"][CONF_LATITUDE] == 32.0853
+        assert result["data"][CONF_LONGITUDE] == 34.7818
+        assert result["data"][CONF_VENUES] == []
 
     @pytest.mark.asyncio
-    async def test_user_step_already_configured(self):
-        """Test already configured error."""
+    async def test_user_step_custom_address(self):
+        """Test that user step creates entry with custom address."""
         flow = WoltConfigFlow()
         flow.hass = MagicMock()
         flow.hass.config.as_dict.return_value = {
@@ -71,26 +78,39 @@ class TestWoltConfigFlow:
             "longitude": 34.7818,
         }
 
-        existing_entry = MagicMock()
-        existing_entry.data = {CONF_SLUG: "gdb"}
-        flow._async_current_entries = MagicMock(return_value=[existing_entry])
+        user_input = {
+            CONF_HUB_NAME: "Office",
+            "location_type": "custom",
+            "address": {
+                "latitude": 32.0667,
+                "longitude": 34.7833,
+            },
+        }
 
-        result = await flow.async_step_user({CONF_SLUG: "gdb"})
+        result = await flow.async_step_user(user_input)
 
-        assert result["errors"] == {CONF_SLUG: "already_configured"}
+        assert result["type"] == FlowResultType.CREATE_ENTRY
+        assert result["title"] == "Wolt Hub - Office"
+        assert result["data"][CONF_ZONE] == "Custom Address"
+        assert result["data"][CONF_LATITUDE] == 32.0667
+        assert result["data"][CONF_LONGITUDE] == 34.7833
 
     @pytest.mark.asyncio
     async def test_user_step_no_location(self):
-        """Test no location error."""
+        """Test no location error when home not set and no custom address."""
         flow = WoltConfigFlow()
         flow.hass = MagicMock()
         flow.hass.config.as_dict.return_value = {
             "latitude": None,
             "longitude": None,
         }
-        flow._async_current_entries = MagicMock(return_value=[])
 
-        result = await flow.async_step_user({CONF_SLUG: "gdb"})
+        user_input = {
+            CONF_HUB_NAME: "Test",
+            "location_type": "home",
+        }
+
+        result = await flow.async_step_user(user_input)
 
         assert result["errors"] == {"base": "no_location"}
 
@@ -119,35 +139,6 @@ class TestWoltConfigFlow:
         lat, lon = flow._get_home_location()
         assert lat is None
         assert lon is None
-
-    @pytest.mark.asyncio
-    async def test_full_flow(self):
-        """Test complete user flow."""
-        flow = WoltConfigFlow()
-        flow.hass = MagicMock()
-        flow.hass.config.as_dict.return_value = {
-            "latitude": 32.0853,
-            "longitude": 34.7818,
-        }
-        flow._async_current_entries = MagicMock(return_value=[])
-
-        user_input = {
-            CONF_SLUG: "gdb",
-            CONF_CITY: DEFAULT_CITY,
-            CONF_COUNTRY: DEFAULT_COUNTRY,
-            CONF_DELIVERY_METHOD: DEFAULT_DELIVERY_METHOD,
-        }
-
-        result = await flow.async_step_user(user_input)
-
-        assert result["type"] == FlowResultType.CREATE_ENTRY
-        assert result["title"] == "Wolt - Gdb"
-        assert result["data"][CONF_SLUG] == "gdb"
-        assert result["data"][CONF_CITY] == DEFAULT_CITY
-        assert result["data"][CONF_COUNTRY] == DEFAULT_COUNTRY
-        assert result["data"][CONF_DELIVERY_METHOD] == DEFAULT_DELIVERY_METHOD
-        assert CONF_LATITUDE in result["data"]
-        assert CONF_LONGITUDE in result["data"]
 
 
 class TestWoltOptionsFlow:

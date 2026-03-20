@@ -10,12 +10,17 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from . import WoltDataUpdateCoordinator
+from . import WoltDataUpdateCoordinator, WoltVenueConfig
 from .const import (
     ATTR_NEXT_CLOSE,
     ATTR_NEXT_OPEN,
     ATTR_VENUE_ID,
+    CONF_DELIVERY_METHOD,
+    CONF_HUB_ID,
+    CONF_HUB_NAME,
     CONF_SLUG,
+    CONF_VENUES,
+    DEFAULT_DELIVERY_METHOD,
     DOMAIN,
 )
 
@@ -26,10 +31,29 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up Wolt binary sensors based on a config entry."""
-    coordinator: WoltDataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id]
-    slug = entry.data[CONF_SLUG]
+    entry_data = hass.data[DOMAIN][entry.entry_id]
+    venues = entry.data.get(CONF_VENUES, [])
+    hub_id = entry.data.get(CONF_HUB_ID, entry.entry_id)
+    hub_name = entry.data.get(CONF_HUB_NAME, "Wolt Hub")
 
-    async_add_entities([WoltAvailabilitySensor(coordinator, slug)])
+    entities = []
+
+    for venue in venues:
+        slug = venue.get(CONF_SLUG)
+        delivery_method = venue.get(CONF_DELIVERY_METHOD, DEFAULT_DELIVERY_METHOD)
+
+        if not slug:
+            continue
+
+        venue_config = WoltVenueConfig(slug=slug, delivery_method=delivery_method)
+        coordinator = WoltDataUpdateCoordinator(hass, entry, venue_config)
+        entry_data["coordinators"][slug] = coordinator
+
+        await coordinator.async_config_entry_first_refresh()
+
+        entities.append(WoltAvailabilitySensor(coordinator, hub_id, hub_name))
+
+    async_add_entities(entities)
 
 
 class WoltAvailabilitySensor(CoordinatorEntity, BinarySensorEntity):
@@ -38,14 +62,21 @@ class WoltAvailabilitySensor(CoordinatorEntity, BinarySensorEntity):
     _attr_has_entity_name: Final = True
     _attr_translation_key: Final = "availability"
 
-    def __init__(self, coordinator: WoltDataUpdateCoordinator, slug: str) -> None:
+    def __init__(
+        self,
+        coordinator: WoltDataUpdateCoordinator,
+        hub_id: str,
+        hub_name: str,
+    ) -> None:
         """Initialize the availability sensor."""
         super().__init__(coordinator)
-        self._attr_unique_id = f"wolt_{slug}_availability"
+        self._attr_unique_id = f"wolt_{coordinator.venue_config.slug}_availability"
         self._attr_device_info = {
-            "identifiers": {(DOMAIN, slug)},
-            "name": f"Wolt {slug.title()}",
+            "identifiers": {(DOMAIN, coordinator.venue_config.slug)},
+            "name": f"Wolt {coordinator.venue_config.slug.title()}",
             "manufacturer": "Wolt",
+            "via_device": (DOMAIN, hub_id),
+            "suggested_area": hub_name,
         }
 
     @property

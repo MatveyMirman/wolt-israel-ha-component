@@ -3,6 +3,7 @@
 from typing import Final
 
 DOMAIN: Final = "wolt"
+DOMAIN_VERSION: Final = 2
 
 API_BASE_URL: Final = "https://consumer-api.wolt.com"
 API_DYNAMIC_ENDPOINT: Final = "/order-xp/web/v1/venue/slug/{slug}/dynamic/"
@@ -12,7 +13,13 @@ DEFAULT_COUNTRY: Final = "isr"
 DEFAULT_CITY: Final = "tel-aviv"
 DEFAULT_DELIVERY_METHOD: Final = "homedelivery"
 DEFAULT_POLLING_INTERVAL: Final = 300
+DEFAULT_HUB_NAME: Final = "My Home"
 
+CONF_HUB_NAME: Final = "hub_name"
+CONF_HUB_ID: Final = "hub_id"
+CONF_ZONE: Final = "zone"
+CONF_ADDRESS: Final = "address"
+CONF_SLUGS: Final = "slugs"
 CONF_SLUG: Final = "slug"
 CONF_CITY: Final = "city"
 CONF_COUNTRY: Final = "country"
@@ -20,6 +27,12 @@ CONF_LATITUDE: Final = "latitude"
 CONF_LONGITUDE: Final = "longitude"
 CONF_DELIVERY_METHOD: Final = "delivery_method"
 CONF_POLLING_INTERVAL: Final = "polling_interval"
+CONF_VENUES: Final = "venues"
+
+VENUE_CONFIG_SCHEMA = {
+    CONF_SLUG: str,
+    CONF_DELIVERY_METHOD: str,
+}
 
 DELIVERY_METHODS: Final = [
     ("homedelivery", "Home Delivery"),
@@ -29,7 +42,7 @@ DELIVERY_METHODS: Final = [
 
 HEADERS: Final = {
     "app-language": "en",
-    "platform": "Web",
+    "platform": "web",
     "Origin": "https://wolt.com",
     "User-Agent": "Mozilla/5.0 (compatible; HomeAssistant)",
 }
@@ -45,3 +58,6 @@ ATTR_VENUE_ID: Final = "venue_id"
 ATTR_NEXT_OPEN: Final = "next_open"
 ATTR_NEXT_CLOSE: Final = "next_close"
 ATTR_ORDER_URL: Final = "order_url"
+ATTR_RATING: Final = "rating"
+ATTR_MINIMUM_ORDER: Final = "minimum_order"
+ATTR_MINIMUM_ORDER_FORMATTED: Final = "minimum_order_formatted"

@@ -9,12 +9,14 @@ from homeassistant.helpers import config_validation as cv
 
 from custom_components.wolt.api import WoltVenueData
 from custom_components.wolt.const import (
-    CONF_CITY,
-    CONF_COUNTRY,
     CONF_DELIVERY_METHOD,
+    CONF_HUB_ID,
+    CONF_HUB_NAME,
     CONF_LATITUDE,
     CONF_LONGITUDE,
     CONF_SLUG,
+    CONF_VENUES,
+    CONF_ZONE,
     DOMAIN,
 )
 
@@ -31,6 +33,9 @@ def mock_wolt_venue_data() -> WoltVenueData:
         venue_id="venue_123",
         next_open="2024-01-15T10:00:00",
         next_close="2024-01-15T22:00:00",
+        rating=4.5,
+        minimum_order_amount=4900,
+        minimum_order_amount_formatted="₪49.00",
         raw_data={},
     )
 
@@ -47,6 +52,9 @@ def mock_wolt_venue_data_unavailable() -> WoltVenueData:
         venue_id="venue_123",
         next_open="2024-01-16T10:00:00",
         next_close=None,
+        rating=4.2,
+        minimum_order_amount=3900,
+        minimum_order_amount_formatted="₪39.00",
         raw_data={},
     )
 
@@ -64,12 +72,17 @@ def mock_config_entry():
     entry = MagicMock()
     entry.entry_id = "test_entry_id"
     entry.data = {
-        CONF_SLUG: "gdb",
-        CONF_CITY: "tel-aviv",
-        CONF_COUNTRY: "isr",
-        CONF_DELIVERY_METHOD: "homedelivery",
+        CONF_HUB_ID: "test_hub_id",
+        CONF_HUB_NAME: "Test Home",
+        CONF_ZONE: "Home Assistant Home",
         CONF_LATITUDE: 32.0853,
         CONF_LONGITUDE: 34.7818,
+        CONF_VENUES: [
+            {
+                CONF_SLUG: "gdb",
+                CONF_DELIVERY_METHOD: "homedelivery",
+            }
+        ],
     }
     entry.options = {}
     return entry

@@ -2,23 +2,74 @@
     "config": {
         "step": {
             "user": {
-                "title": "Wolt Venue",
-                "description": "Enter the Wolt venue slug from the venue URL (e.g., 'gdb' from wolt.com/isr/tel-aviv/venue/gdb)"
+                "title": "Wolt Hub",
+                "description": "Configure a Wolt hub to track multiple venues",
+                "data": {
+                    "hub_name": "Hub Name",
+                    "hub_name_help": "A friendly name for this hub (e.g., 'Home', 'Office')",
+                    "location_type": "Location",
+                    "custom_address": "Custom Address"
+                }
+            },
+            "venues": {
+                "title": "Wolt Venues",
+                "description": "Add venues to monitor"
             }
         },
         "error": {
-            "already_configured": "This venue is already configured",
-            "no_location": "Home location is not set in Home Assistant. Please set your home location in General settings."
+            "already_configured": "This hub is already configured",
+            "no_location": "Home location is not set in Home Assistant. Please set your home location in General settings, or enter a custom address.",
+            "no_venues": "Please add at least one venue slug"
         },
         "abort": {
-            "already_configured": "This venue is already configured"
+            "already_configured": "This hub is already configured"
         }
     },
     "options": {
         "step": {
             "init": {
                 "title": "Wolt Options",
-                "description": "Configure polling settings"
+                "description": "Configure polling settings",
+                "data": {
+                    "polling_interval": "Polling Interval (seconds)",
+                    "polling_help": "How often to update venue data (60-3600 seconds, default: 300)"
+                }
+            }
+        }
+    },
+    "entity": {
+        "sensor": {
+            "status_text": {
+                "name": "Status",
+                "description": "Venue status text"
+            },
+            "delivery_time": {
+                "name": "Delivery Time",
+                "description": "Estimated delivery time"
+            },
+            "delivery_fee": {
+                "name": "Delivery Fee",
+                "description": "Delivery fee amount"
+            },
+            "rating": {
+                "name": "Rating",
+                "description": "Venue rating"
+            },
+            "minimum_order": {
+                "name": "Minimum Order",
+                "description": "Minimum order amount"
+            }
+        },
+        "binary_sensor": {
+            "availability": {
+                "name": "Available",
+                "description": "Whether the venue is accepting orders"
+            }
+        },
+        "button": {
+            "order": {
+                "name": "Order",
+                "description": "Open Wolt to order"
             }
         }
     }

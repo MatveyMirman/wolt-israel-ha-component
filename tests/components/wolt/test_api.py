@@ -33,6 +33,7 @@ class TestWoltApiClient:
             return_value={
                 "venue": {
                     "online": True,
+                    "rating": 4.5,
                     "delivery_open_status": {
                         "value": "Open for delivery",
                         "next_open": "2024-01-15T10:00:00",
@@ -53,6 +54,11 @@ class TestWoltApiClient:
                                         "type": "LINK_WITH_ICON",
                                         "link": "DELIVERY_FEE",
                                         "value": "₪14.00",
+                                    },
+                                    {
+                                        "type": "LINK_WITH_ICON",
+                                        "link": "MINIMUM_ORDER",
+                                        "value": "₪49.00",
                                     }
                                 ],
                             }
@@ -74,10 +80,13 @@ class TestWoltApiClient:
 
         assert result is not None
         assert result.online is True
+        assert result.rating == 4.5
         assert result.status_text == "Open for delivery"
         assert result.delivery_time == "25-35 min"
         assert result.delivery_fee == 1400
         assert result.delivery_fee_formatted == "₪14.00"
+        assert result.minimum_order_amount == 4900
+        assert result.minimum_order_amount_formatted == "₪49.00"
         assert result.venue_id == "venue_123"
 
     async def test_async_get_venue_dynamic_api_error(
@@ -144,15 +153,21 @@ class TestWoltVenueData:
     def test_venue_data_creation(self, mock_wolt_venue_data):
         """Test creating WoltVenueData instance."""
         assert mock_wolt_venue_data.online is True
+        assert mock_wolt_venue_data.rating == 4.5
         assert mock_wolt_venue_data.status_text == "Open for delivery"
         assert mock_wolt_venue_data.delivery_time == "25-35 min"
         assert mock_wolt_venue_data.delivery_fee == 1400
         assert mock_wolt_venue_data.delivery_fee_formatted == "₪14.00"
+        assert mock_wolt_venue_data.minimum_order_amount == 4900
+        assert mock_wolt_venue_data.minimum_order_amount_formatted == "₪49.00"
         assert mock_wolt_venue_data.venue_id == "venue_123"
 
     def test_venue_data_unavailable(self, mock_wolt_venue_data_unavailable):
         """Test creating WoltVenueData for unavailable venue."""
         assert mock_wolt_venue_data_unavailable.online is False
+        assert mock_wolt_venue_data_unavailable.rating == 4.2
         assert mock_wolt_venue_data_unavailable.status_text == "Closed"
         assert mock_wolt_venue_data_unavailable.delivery_time is None
         assert mock_wolt_venue_data_unavailable.delivery_fee is None
+        assert mock_wolt_venue_data_unavailable.minimum_order_amount == 3900
+        assert mock_wolt_venue_data_unavailable.minimum_order_amount_formatted == "₪39.00"

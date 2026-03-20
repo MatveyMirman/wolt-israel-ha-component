@@ -1,80 +1,122 @@
 """Config flow for Wolt integration."""
 
+import uuid
+
 import voluptuous as vol
 from homeassistant.config_entries import (
     ConfigEntry,
     ConfigFlow,
     OptionsFlow,
 )
-from homeassistant.data_entry_flow import FlowResult
+from homeassistant.helpers import selector
 
 from .const import (
-    CONF_CITY,
-    CONF_COUNTRY,
+    CONF_ADDRESS,
     CONF_DELIVERY_METHOD,
+    CONF_HUB_ID,
+    CONF_HUB_NAME,
     CONF_LATITUDE,
     CONF_LONGITUDE,
     CONF_POLLING_INTERVAL,
     CONF_SLUG,
-    DEFAULT_CITY,
-    DEFAULT_COUNTRY,
+    CONF_VENUES,
+    CONF_ZONE,
     DEFAULT_DELIVERY_METHOD,
+    DEFAULT_HUB_NAME,
     DEFAULT_POLLING_INTERVAL,
     DELIVERY_METHODS,
     DOMAIN,
-)
-
-USER_SCHEMA = vol.Schema(
-    {
-        vol.Required(CONF_SLUG): str,
-        vol.Optional(CONF_CITY, default=DEFAULT_CITY): str,
-        vol.Optional(CONF_COUNTRY, default=DEFAULT_COUNTRY): str,
-        vol.Optional(CONF_DELIVERY_METHOD, default=DEFAULT_DELIVERY_METHOD): vol.In(
-            [method[0] for method in DELIVERY_METHODS]
-        ),
-    }
 )
 
 
 class WoltConfigFlow(ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Wolt."""
 
-    VERSION = 1
-    MINOR_VERSION = 1
+    VERSION = 2
+    MINOR_VERSION = 0
 
-    async def async_step_user(self, user_input: dict | None = None) -> FlowResult:
-        """Handle the initial step."""
+    async def async_step_user(self, user_input: dict | None = None) -> ConfigFlow:
+        """Handle the initial step - configure hub."""
         errors: dict[str, str] = {}
 
         if user_input is not None:
-            slug = user_input[CONF_SLUG].lower().strip()
-            existing_entries = self._async_current_entries()
-            for entry in existing_entries:
-                if entry.data[CONF_SLUG] == slug:
-                    errors[CONF_SLUG] = "already_configured"
-                    break
+            hub_name = user_input.get(CONF_HUB_NAME, DEFAULT_HUB_NAME)
+            lat = None
+            lon = None
+            zone_name = None
+            location_type = user_input.get("location_type", "home")
 
-            if not errors:
-                lat, lon = self._get_home_location()
-                if lat is None or lon is None:
+            if location_type == "custom":
+                address = user_input.get(CONF_ADDRESS, {})
+                lat = address.get("latitude")
+                lon = address.get("longitude")
+                zone_name = "Custom Address"
+            elif location_type == "home":
+                home_lat, home_lon = self._get_home_location()
+                if home_lat is None or home_lon is None:
                     errors["base"] = "no_location"
+                    return self.async_show_form(
+                        step_id="user",
+                        data_schema=self._get_schema(user_input),
+                        errors=errors,
+                    )
+                lat = home_lat
+                lon = home_lon
+                zone_name = "Home Assistant Home"
+            else:
+                zones = self._get_zones()
+                for zone in zones:
+                    if zone["id"] == location_type:
+                        lat = zone["latitude"]
+                        lon = zone["longitude"]
+                        zone_name = zone["name"]
+                        break
 
-            if not errors:
-                user_input[CONF_SLUG] = slug
+            if not errors and lat is not None and lon is not None:
+                hub_id = str(uuid.uuid4())
                 return self.async_create_entry(
-                    title=f"Wolt - {slug.title()}",
-                    data={**user_input, CONF_LATITUDE: lat, CONF_LONGITUDE: lon},
+                    title=f"Wolt Hub - {hub_name}",
+                    data={
+                        CONF_HUB_ID: hub_id,
+                        CONF_HUB_NAME: hub_name,
+                        CONF_ZONE: zone_name,
+                        CONF_LATITUDE: lat,
+                        CONF_LONGITUDE: lon,
+                        CONF_VENUES: [],
+                    },
                 )
 
         return self.async_show_form(
             step_id="user",
-            data_schema=USER_SCHEMA,
+            data_schema=self._get_schema(user_input or {}),
             errors=errors,
             description_placeholders={
-                "slug_help": "The venue slug from the Wolt URL (e.g., 'gdb' from wolt.com/isr/tel-aviv/venue/gdb)",
-                "city_default": DEFAULT_CITY,
+                "hub_name_help": "A friendly name for this hub (e.g., 'Home', 'Office')",
             },
         )
+
+    def _get_schema(self, user_input: dict) -> vol.Schema:
+        """Build the schema based on available options."""
+        zones = self._get_zones()
+        home_lat, _ = self._get_home_location()
+        
+        if zones or home_lat is not None:
+            location_options = {}
+            if home_lat is not None:
+                location_options["home"] = "Use Home Assistant Home Location"
+            for zone in zones:
+                location_options[f"area_{zone['id']}"] = f"Zone: {zone['name']}"
+            location_options["custom"] = "Enter Custom Address"
+
+            return vol.Schema({
+                vol.Required(CONF_HUB_NAME, default=user_input.get(CONF_HUB_NAME, DEFAULT_HUB_NAME)): str,
+                vol.Required("location_type", default=user_input.get("location_type", "home")): vol.In(location_options),
+                vol.Optional(CONF_ADDRESS): selector.LocationSelectorConfig(),
+            })
+        
+        return vol.Schema({
+            vol.Required(CONF_HUB_NAME, default=user_input.get(CONF_HUB_NAME, DEFAULT_HUB_NAME)): str,
+        })
 
     def _get_home_location(self) -> tuple:
         """Get home location from Home Assistant config."""
@@ -85,6 +127,24 @@ class WoltConfigFlow(ConfigFlow, domain=DOMAIN):
         ):
             return (config_dict["latitude"], config_dict["longitude"])
         return (None, None)
+
+    def _get_zones(self) -> list[dict]:
+        """Get zones from Home Assistant."""
+        zones = []
+        try:
+            area_registry = self.hass.data.get("area_registry")
+            if area_registry:
+                for area_id, area in area_registry.areas.items():
+                    if hasattr(area, "latitude") and area.latitude is not None:
+                        zones.append({
+                            "id": area_id,
+                            "name": area.name,
+                            "latitude": area.latitude,
+                            "longitude": area.longitude,
+                        })
+        except Exception:
+            pass
+        return zones
 
     @staticmethod
     def async_get_options_flow(config_entry: ConfigEntry) -> OptionsFlow:
@@ -99,7 +159,7 @@ class WoltOptionsFlow(OptionsFlow):
         """Initialize options flow."""
         self._config_entry = config_entry
 
-    async def async_step_init(self, user_input: dict | None = None) -> FlowResult:
+    async def async_step_init(self, user_input: dict | None = None) -> ConfigFlow:
         """Manage the options."""
         if user_input is not None:
             return self.async_create_entry(title="", data=user_input)
