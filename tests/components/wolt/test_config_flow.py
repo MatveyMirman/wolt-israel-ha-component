@@ -172,6 +172,10 @@ class TestWoltOptionsFlow:
         flow.hass = MagicMock()
         flow._config_entry = mock_config_entry
         flow._entry_id = mock_config_entry.entry_id
+        mock_entry = MagicMock()
+        mock_entry.data = mock_config_entry.data
+        flow.hass.config_entries.async_get_entry = MagicMock(return_value=mock_entry)
+        flow.hass.config_entries.async_update_entry = MagicMock()
         return flow
 
     def test_options_flow_init(self, mock_config_entry):
@@ -188,37 +192,22 @@ class TestWoltOptionsFlow:
 
         assert result["type"] == FlowResultType.FORM
         assert result["step_id"] == "init"
-        assert "manage_venues" in result["data_schema"].schema
         assert CONF_POLLING_INTERVAL in result["data_schema"].schema
+        assert "slug_0" in result["data_schema"].schema
+        assert "delivery_method_0" in result["data_schema"].schema
 
     @pytest.mark.asyncio
     async def test_options_flow_update(self, options_flow):
         """Test options flow updates successfully."""
-        user_input = {"manage_venues": False, CONF_POLLING_INTERVAL: 600}
+        user_input = {
+            "slug_0": "test-venue",
+            "delivery_method_0": "homedelivery",
+            "slug_1": "",
+            "delivery_method_1": "homedelivery",
+            CONF_POLLING_INTERVAL: 600,
+        }
 
         result = await options_flow.async_step_init(user_input)
 
-        assert result["type"] == FlowResultType.FORM
-        assert result["step_id"] == "venues"
-
-    @pytest.mark.asyncio
-    async def test_options_flow_venues_step(self, options_flow):
-        """Test venues step saves venues."""
-        mock_entry = MagicMock()
-        mock_entry.data = {CONF_VENUES: []}
-        options_flow.hass.config_entries.async_get_entry = MagicMock(return_value=mock_entry)
-        options_flow.hass.config_entries.async_update_entry = MagicMock()
-
-        user_input = {
-            CONF_SLUG: ["gdb", "another-venue"],
-            CONF_DELIVERY_METHOD: ["homedelivery", "takeaway"],
-            CONF_POLLING_INTERVAL: 300,
-        }
-
-        result = await options_flow.async_step_venues(user_input)
-
         assert result["type"] == FlowResultType.CREATE_ENTRY
-        mock_entry.data = {CONF_VENUES: [
-            {CONF_SLUG: "gdb", CONF_DELIVERY_METHOD: "homedelivery"},
-            {CONF_SLUG: "another-venue", CONF_DELIVERY_METHOD: "takeaway"},
-        ]}
+        options_flow.hass.config_entries.async_update_entry.assert_called_once()
