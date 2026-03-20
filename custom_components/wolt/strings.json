@@ -9,10 +9,6 @@
                     "hub_name_help": "A friendly name for this hub (e.g., 'Home', 'Office')",
                     "location_type": "Location"
                 }
-            },
-            "venues": {
-                "title": "Wolt Venues",
-                "description": "Add venues to monitor"
             }
         },
         "error": {
@@ -32,7 +28,17 @@
                 "description": "Configure polling settings",
                 "data": {
                     "polling_interval": "Polling Interval (seconds)",
-                    "polling_help": "How often to update venue data (60-3600 seconds, default: 300)"
+                    "polling_help": "How often to update venue data (60-3600 seconds, default: 300)",
+                    "manage_venues": "Add or remove venues"
+                }
+            },
+            "venues": {
+                "title": "Manage Venues",
+                "description": "Add or remove venue slugs to monitor",
+                "data": {
+                    "slug": "Venue Slug",
+                    "slug_help": "The venue slug from the Wolt URL (e.g., 'gdb' from wolt.com/isr/tel-aviv/venue/gdb)",
+                    "delivery_method": "Delivery Method"
                 }
             }
         }

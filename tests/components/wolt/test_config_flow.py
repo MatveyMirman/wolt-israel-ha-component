@@ -43,8 +43,8 @@ class TestWoltConfigFlow:
         assert "location_type" in result["data_schema"].schema
 
     @pytest.mark.asyncio
-    async def test_user_step_creates_entry(self):
-        """Test that user step creates entry with hub config."""
+    async def test_user_step_creates_entry_with_home(self):
+        """Test that user step creates entry with home location."""
         flow = WoltConfigFlow()
         flow.hass = MagicMock()
         flow.hass.config.as_dict.return_value = {
@@ -69,6 +69,31 @@ class TestWoltConfigFlow:
         assert result["data"][CONF_VENUES] == []
 
     @pytest.mark.asyncio
+    async def test_user_step_creates_entry_with_custom_coords(self):
+        """Test that user step creates entry with custom coordinates."""
+        flow = WoltConfigFlow()
+        flow.hass = MagicMock()
+        flow.hass.config.as_dict.return_value = {
+            "latitude": 32.0853,
+            "longitude": 34.7818,
+        }
+
+        user_input = {
+            CONF_HUB_NAME: "Office",
+            "location_type": "custom",
+            CONF_LATITUDE: 32.0667,
+            CONF_LONGITUDE: 34.7833,
+        }
+
+        result = await flow.async_step_user(user_input)
+
+        assert result["type"] == FlowResultType.CREATE_ENTRY
+        assert result["title"] == "Wolt Hub - Office"
+        assert result["data"][CONF_ZONE] == "Custom Location"
+        assert result["data"][CONF_LATITUDE] == 32.0667
+        assert result["data"][CONF_LONGITUDE] == 34.7833
+
+    @pytest.mark.asyncio
     async def test_user_step_no_location_aborts(self):
         """Test that user step aborts when no location is available."""
         flow = WoltConfigFlow()
@@ -84,8 +109,8 @@ class TestWoltConfigFlow:
         assert result["reason"] == "no_location"
 
     @pytest.mark.asyncio
-    async def test_user_step_no_location_error(self):
-        """Test no location error when home not set and zones available."""
+    async def test_user_step_no_home_location_error(self):
+        """Test no location error when home not set."""
         flow = WoltConfigFlow()
         flow.hass = MagicMock()
         flow.hass.config.as_dict.return_value = {
@@ -136,7 +161,11 @@ class TestWoltOptionsFlow:
     def mock_config_entry(self):
         """Create a mock config entry."""
         entry = MagicMock()
+        entry.entry_id = "test_entry_id"
         entry.options = {}
+        entry.data = {
+            CONF_VENUES: [{CONF_SLUG: "test-venue", "delivery_method": "homedelivery"}],
+        }
         return entry
 
     @pytest.fixture
@@ -145,6 +174,7 @@ class TestWoltOptionsFlow:
         flow = WoltOptionsFlow.__new__(WoltOptionsFlow)
         flow.hass = MagicMock()
         flow._config_entry = mock_config_entry
+        flow._entry_id = mock_config_entry.entry_id
         return flow
 
     def test_options_flow_init(self, mock_config_entry):
@@ -161,23 +191,37 @@ class TestWoltOptionsFlow:
 
         assert result["type"] == FlowResultType.FORM
         assert result["step_id"] == "init"
+        assert "manage_venues" in result["data_schema"].schema
         assert CONF_POLLING_INTERVAL in result["data_schema"].schema
 
     @pytest.mark.asyncio
     async def test_options_flow_update(self, options_flow):
         """Test options flow updates successfully."""
-        user_input = {CONF_POLLING_INTERVAL: 600}
+        user_input = {"manage_venues": False, CONF_POLLING_INTERVAL: 600}
 
         result = await options_flow.async_step_init(user_input)
 
-        assert result["type"] == FlowResultType.CREATE_ENTRY
-        assert result["data"][CONF_POLLING_INTERVAL] == 600
+        assert result["type"] == FlowResultType.FORM
+        assert result["step_id"] == "venues"
 
     @pytest.mark.asyncio
-    async def test_options_flow_default_polling_interval(self, options_flow):
-        """Test options flow uses default polling interval via vol.Optional."""
-        result = await options_flow.async_step_init()
-        data_schema = result["data_schema"]
+    async def test_options_flow_venues_step(self, options_flow):
+        """Test venues step saves venues."""
+        mock_entry = MagicMock()
+        mock_entry.data = {CONF_VENUES: []}
+        options_flow.hass.config_entries.async_get_entry = MagicMock(return_value=mock_entry)
+        options_flow.hass.config_entries.async_update_entry = MagicMock()
 
-        test_result = data_schema({})
-        assert test_result[CONF_POLLING_INTERVAL] == DEFAULT_POLLING_INTERVAL
+        user_input = {
+            CONF_SLUG: ["gdb", "another-venue"],
+            CONF_DELIVERY_METHOD: ["homedelivery", "takeaway"],
+            CONF_POLLING_INTERVAL: 300,
+        }
+
+        result = await options_flow.async_step_venues(user_input)
+
+        assert result["type"] == FlowResultType.CREATE_ENTRY
+        mock_entry.data = {CONF_VENUES: [
+            {CONF_SLUG: "gdb", CONF_DELIVERY_METHOD: "homedelivery"},
+            {CONF_SLUG: "another-venue", CONF_DELIVERY_METHOD: "takeaway"},
+        ]}
