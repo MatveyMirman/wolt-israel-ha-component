@@ -15,5 +15,5 @@
         "aiohttp>=3.9.0",
         "voluptuous>=0.13.0"
     ],
-    "version": "0.2.3"
+    "version": "0.2.4"
 }
