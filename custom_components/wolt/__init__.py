@@ -107,7 +107,7 @@ class WoltDataUpdateCoordinator(DataUpdateCoordinator[WoltVenueData | None]):
     @property
     def order_url(self) -> str:
         """Generate the Wolt order URL."""
-        return f"https://wolt.com/{self._slug}"
+        return f"https://wolt.com/en/isr/tel-aviv/restaurant/{self._slug}"
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
