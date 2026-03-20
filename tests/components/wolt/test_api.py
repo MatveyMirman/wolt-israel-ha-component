@@ -33,7 +33,10 @@ class TestWoltApiClient:
             return_value={
                 "venue": {
                     "online": True,
-                    "rating": 4.5,
+                    "order_minimum": {
+                        "formatted": "₪49.00",
+                        "amount": 4900
+                    },
                     "delivery_open_status": {
                         "value": "Open for delivery",
                         "next_open": "2024-01-15T10:00:00",
@@ -54,11 +57,6 @@ class TestWoltApiClient:
                                         "type": "LINK_WITH_ICON",
                                         "link": "DELIVERY_FEE",
                                         "value": "₪14.00",
-                                    },
-                                    {
-                                        "type": "LINK_WITH_ICON",
-                                        "link": "MINIMUM_ORDER",
-                                        "value": "₪49.00",
                                     }
                                 ],
                             }
@@ -80,7 +78,6 @@ class TestWoltApiClient:
 
         assert result is not None
         assert result.online is True
-        assert result.rating == 4.5
         assert result.status_text == "Open for delivery"
         assert result.delivery_time == "25-35 min"
         assert result.delivery_fee == 1400
@@ -153,7 +150,6 @@ class TestWoltVenueData:
     def test_venue_data_creation(self, mock_wolt_venue_data):
         """Test creating WoltVenueData instance."""
         assert mock_wolt_venue_data.online is True
-        assert mock_wolt_venue_data.rating == 4.5
         assert mock_wolt_venue_data.status_text == "Open for delivery"
         assert mock_wolt_venue_data.delivery_time == "25-35 min"
         assert mock_wolt_venue_data.delivery_fee == 1400
@@ -165,7 +161,6 @@ class TestWoltVenueData:
     def test_venue_data_unavailable(self, mock_wolt_venue_data_unavailable):
         """Test creating WoltVenueData for unavailable venue."""
         assert mock_wolt_venue_data_unavailable.online is False
-        assert mock_wolt_venue_data_unavailable.rating == 4.2
         assert mock_wolt_venue_data_unavailable.status_text == "Closed"
         assert mock_wolt_venue_data_unavailable.delivery_time is None
         assert mock_wolt_venue_data_unavailable.delivery_fee is None

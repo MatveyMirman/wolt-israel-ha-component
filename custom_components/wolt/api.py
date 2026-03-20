@@ -29,7 +29,6 @@ class WoltVenueData:
     venue_id: str | None
     next_open: str | None
     next_close: str | None
-    rating: float | None
     minimum_order_amount: int | None
     minimum_order_amount_formatted: str | None
     raw_data: dict[str, Any] | None
@@ -113,24 +112,24 @@ class WoltApiClient:
 
         delivery_fee = None
         delivery_fee_formatted = None
-        minimum_order_amount = None
-        minimum_order_amount_formatted = None
         header = venue.get("header", {})
         method_statuses = header.get("delivery_method_statuses", [])
         for method_status in method_statuses:
             if method_status.get("delivery_method") == "UNAVAILABLE":
                 metadata = method_status.get("metadata", [])
                 for item in metadata:
-                    if item.get("type") == "LINK_WITH_ICON":
-                        link = item.get("link")
-                        if link == "DELIVERY_FEE":
-                            delivery_fee_formatted = item.get("value")
-                            delivery_fee = self._parse_fee(delivery_fee_formatted)
-                        elif link == "MINIMUM_ORDER":
-                            minimum_order_amount_formatted = item.get("value")
-                            minimum_order_amount = self._parse_fee(minimum_order_amount_formatted)
+                    if item.get("type") == "LINK_WITH_ICON" and item.get("link") == "DELIVERY_FEE":
+                        delivery_fee_formatted = item.get("value")
+                        delivery_fee = self._parse_fee(delivery_fee_formatted)
 
-        rating = self._parse_rating(venue)
+        minimum_order_amount = None
+        minimum_order_amount_formatted = None
+        order_minimum = venue.get("order_minimum")
+        if order_minimum:
+            minimum_order_amount_formatted = order_minimum.get("formatted")
+            amount = order_minimum.get("amount")
+            if amount:
+                minimum_order_amount = int(amount)
 
         return WoltVenueData(
             online=online,
@@ -141,28 +140,10 @@ class WoltApiClient:
             venue_id=venue.get("id"),
             next_open=next_open,
             next_close=next_close,
-            rating=rating,
             minimum_order_amount=minimum_order_amount,
             minimum_order_amount_formatted=minimum_order_amount_formatted,
             raw_data=data,
         )
-
-    def _parse_rating(self, venue: dict[str, Any]) -> float | None:
-        """Parse rating from venue data.
-
-        Args:
-            venue: Venue dictionary
-
-        Returns:
-            Rating as float or None if not available
-        """
-        raw_rating = venue.get("rating")
-        if raw_rating is not None:
-            try:
-                return float(raw_rating)
-            except (ValueError, TypeError):
-                return None
-        return None
 
     def _get_delivery_method(self) -> str:
         """Get the configured delivery method."""

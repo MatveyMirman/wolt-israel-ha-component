@@ -8,7 +8,6 @@ from custom_components.wolt.sensor import (
     WoltStatusTextSensor,
     WoltDeliveryTimeSensor,
     WoltDeliveryFeeSensor,
-    WoltRatingSensor,
     WoltMinimumOrderSensor,
 )
 
@@ -145,47 +144,6 @@ class TestWoltDeliveryFeeSensor:
 
         sensor = WoltDeliveryFeeSensor(coordinator, "test_hub_id", "Test Home")
         assert sensor.icon == "mdi:currency-usd"
-
-
-class TestWoltRatingSensor:
-    """Tests for WoltRatingSensor."""
-
-    def test_native_value_with_data(self, mock_wolt_venue_data):
-        """Test native_value returns rating when data is available."""
-        coordinator = MagicMock()
-        coordinator.data = mock_wolt_venue_data
-        coordinator.venue_config.slug = "gdb"
-
-        sensor = WoltRatingSensor(coordinator, "test_hub_id", "Test Home")
-        assert sensor.native_value == 4.5
-
-    def test_native_value_no_data(self):
-        """Test native_value returns None when no data."""
-        coordinator = MagicMock()
-        coordinator.data = None
-        coordinator.venue_config.slug = "gdb"
-
-        sensor = WoltRatingSensor(coordinator, "test_hub_id", "Test Home")
-        assert sensor.native_value is None
-
-    def test_extra_state_attributes_with_data(self, mock_wolt_venue_data):
-        """Test extra_state_attributes returns rating."""
-        coordinator = MagicMock()
-        coordinator.data = mock_wolt_venue_data
-        coordinator.venue_config.slug = "gdb"
-
-        sensor = WoltRatingSensor(coordinator, "test_hub_id", "Test Home")
-        attrs = sensor.extra_state_attributes
-        assert attrs["rating"] == 4.5
-
-    def test_icon(self, mock_wolt_venue_data):
-        """Test icon returns correct value."""
-        coordinator = MagicMock()
-        coordinator.data = mock_wolt_venue_data
-        coordinator.venue_config.slug = "gdb"
-
-        sensor = WoltRatingSensor(coordinator, "test_hub_id", "Test Home")
-        assert sensor.icon == "mdi:star"
 
 
 class TestWoltMinimumOrderSensor:

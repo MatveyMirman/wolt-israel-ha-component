@@ -15,7 +15,6 @@ from . import WoltDataUpdateCoordinator, WoltVenueConfig
 from .const import (
     ATTR_DELIVERY_FEE,
     ATTR_MINIMUM_ORDER,
-    ATTR_RATING,
     CONF_DELIVERY_METHOD,
     CONF_HUB_ID,
     CONF_HUB_NAME,
@@ -58,7 +57,6 @@ async def async_setup_entry(
             WoltStatusTextSensor(coordinator, hub_id, hub_name),
             WoltDeliveryTimeSensor(coordinator, hub_id, hub_name),
             WoltDeliveryFeeSensor(coordinator, hub_id, hub_name),
-            WoltRatingSensor(coordinator, hub_id, hub_name),
             WoltMinimumOrderSensor(coordinator, hub_id, hub_name),
         ]
         entities.extend(venue_entities)
@@ -176,51 +174,6 @@ class WoltDeliveryFeeSensor(CoordinatorEntity, SensorEntity):
     def icon(self) -> str:
         """Return the icon."""
         return "mdi:currency-usd"
-
-
-class WoltRatingSensor(CoordinatorEntity, SensorEntity):
-    """Sensor for venue rating."""
-
-    _attr_has_entity_name: Final = True
-    _attr_translation_key: Final = "rating"
-
-    def __init__(
-        self,
-        coordinator: WoltDataUpdateCoordinator,
-        hub_id: str,
-        hub_name: str,
-    ) -> None:
-        """Initialize the rating sensor."""
-        super().__init__(coordinator)
-        self._attr_unique_id = f"wolt_{coordinator.venue_config.slug}_rating"
-        self._attr_device_info = {
-            "identifiers": {(DOMAIN, coordinator.venue_config.slug)},
-            "name": f"Wolt {coordinator.venue_config.slug.title()}",
-            "manufacturer": "Wolt",
-            "via_device": (DOMAIN, hub_id),
-            "suggested_area": hub_name,
-        }
-
-    @property
-    def native_value(self) -> float | None:
-        """Return the venue rating."""
-        if self.coordinator.data is None:
-            return None
-        return self.coordinator.data.rating
-
-    @property
-    def extra_state_attributes(self) -> dict:
-        """Return additional attributes."""
-        if self.coordinator.data is None:
-            return {}
-        return {
-            ATTR_RATING: self.coordinator.data.rating,
-        }
-
-    @property
-    def icon(self) -> str:
-        """Return the icon."""
-        return "mdi:star"
 
 
 class WoltMinimumOrderSensor(CoordinatorEntity, SensorEntity):

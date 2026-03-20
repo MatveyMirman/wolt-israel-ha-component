@@ -57,10 +57,6 @@
                 "name": "Delivery Fee",
                 "description": "Delivery fee amount"
             },
-            "rating": {
-                "name": "Rating",
-                "description": "Venue rating"
-            },
             "minimum_order": {
                 "name": "Minimum Order",
                 "description": "Minimum order amount"
