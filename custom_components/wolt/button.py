@@ -59,8 +59,7 @@ async def async_setup_entry(
 class WoltOrderButton(CoordinatorEntity, ButtonEntity):
     """Button to open Wolt for ordering."""
 
-    _attr_has_entity_name: Final = True
-    _attr_translation_key: Final = "order"
+    _attr_name: Final = "Order"
 
     def __init__(
         self,
@@ -88,7 +87,7 @@ class WoltOrderButton(CoordinatorEntity, ButtonEntity):
             "persistent_notification",
             {
                 "title": "Open Wolt Order",
-                "message": f'[Click here to order from Wolt]({url})',
+                "message": f"[Click here to order from Wolt]({url})",
                 "data": {"click_action": {"action": "url", "url": url}},
             },
         )

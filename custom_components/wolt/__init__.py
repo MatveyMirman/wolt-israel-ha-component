@@ -14,14 +14,11 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .api import WoltApiClient, WoltVenueData
 from .const import (
-    CONF_DELIVERY_METHOD,
     CONF_HUB_ID,
     CONF_HUB_NAME,
     CONF_LATITUDE,
     CONF_LONGITUDE,
     CONF_POLLING_INTERVAL,
-    CONF_SLUG,
-    CONF_VENUES,
     DEFAULT_POLLING_INTERVAL,
     DOMAIN,
 )

@@ -59,8 +59,7 @@ async def async_setup_entry(
 class WoltAvailabilitySensor(CoordinatorEntity, BinarySensorEntity):
     """Binary sensor for Wolt venue availability."""
 
-    _attr_has_entity_name: Final = True
-    _attr_translation_key: Final = "availability"
+    _attr_name: Final = "Available"
 
     def __init__(
         self,

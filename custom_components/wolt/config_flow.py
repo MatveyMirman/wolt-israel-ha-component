@@ -105,7 +105,9 @@ class WoltConfigFlow(ConfigFlow, domain=DOMAIN):
             },
         )
 
-    def _get_schema(self, user_input: dict, zones: list, home_lat: float | None) -> vol.Schema:
+    def _get_schema(
+        self, user_input: dict, zones: list, home_lat: float | None
+    ) -> vol.Schema:
         """Build the schema based on available options."""
         location_options = {}
         default_location = "home"
@@ -121,8 +123,13 @@ class WoltConfigFlow(ConfigFlow, domain=DOMAIN):
         location_options["custom"] = "Enter Custom Coordinates"
 
         schema_dict = {
-            vol.Required(CONF_HUB_NAME, default=user_input.get(CONF_HUB_NAME, DEFAULT_HUB_NAME)): str,
-            vol.Required("location_type", default=user_input.get("location_type", default_location)): vol.In(location_options),
+            vol.Required(
+                CONF_HUB_NAME, default=user_input.get(CONF_HUB_NAME, DEFAULT_HUB_NAME)
+            ): str,
+            vol.Required(
+                "location_type",
+                default=user_input.get("location_type", default_location),
+            ): vol.In(location_options),
         }
 
         if user_input.get("location_type") == "custom":
@@ -149,12 +156,14 @@ class WoltConfigFlow(ConfigFlow, domain=DOMAIN):
             if area_registry:
                 for area_id, area in area_registry.areas.items():
                     if hasattr(area, "latitude") and area.latitude is not None:
-                        zones.append({
-                            "id": area_id,
-                            "name": area.name,
-                            "latitude": area.latitude,
-                            "longitude": area.longitude,
-                        })
+                        zones.append(
+                            {
+                                "id": area_id,
+                                "name": area.name,
+                                "latitude": area.latitude,
+                                "longitude": area.longitude,
+                            }
+                        )
         except Exception:
             pass
         return zones
@@ -180,30 +189,43 @@ class WoltOptionsFlow(OptionsFlow):
 
         if user_input is not None:
             venues = []
-            
+
             for i in range(5):
                 slug_key = f"slug_{i}"
                 method_key = f"delivery_method_{i}"
-                
+
                 slug = user_input.get(slug_key, "").lower().strip()
                 method = user_input.get(method_key, DEFAULT_DELIVERY_METHOD)
-                
+
                 if slug:
-                    venues.append({
-                        CONF_SLUG: slug,
-                        CONF_DELIVERY_METHOD: method,
-                    })
+                    venues.append(
+                        {
+                            CONF_SLUG: slug,
+                            CONF_DELIVERY_METHOD: method,
+                        }
+                    )
 
             if entry:
                 new_data = {**entry.data, CONF_VENUES: venues}
                 self.hass.config_entries.async_update_entry(entry, data=new_data)
 
-            options = {CONF_POLLING_INTERVAL: user_input.get(CONF_POLLING_INTERVAL, DEFAULT_POLLING_INTERVAL)}
+            options = {
+                CONF_POLLING_INTERVAL: user_input.get(
+                    CONF_POLLING_INTERVAL, DEFAULT_POLLING_INTERVAL
+                )
+            }
             return self.async_create_entry(title="", data=options)
 
         venue_schema_dict: dict = {}
 
-        venue_schema_dict[vol.Optional(CONF_POLLING_INTERVAL, default=self._config_entry.options.get(CONF_POLLING_INTERVAL, DEFAULT_POLLING_INTERVAL))] = vol.All(vol.Coerce(int), vol.Range(min=60, max=3600))
+        venue_schema_dict[
+            vol.Optional(
+                CONF_POLLING_INTERVAL,
+                default=self._config_entry.options.get(
+                    CONF_POLLING_INTERVAL, DEFAULT_POLLING_INTERVAL
+                ),
+            )
+        ] = vol.All(vol.Coerce(int), vol.Range(min=60, max=3600))
 
         delivery_methods = {m[0]: m[1] for m in DELIVERY_METHODS}
         for i in range(5):
@@ -211,10 +233,14 @@ class WoltOptionsFlow(OptionsFlow):
             default_method = DEFAULT_DELIVERY_METHOD
             if i < len(current_venues):
                 default_slug = current_venues[i].get(CONF_SLUG, "")
-                default_method = current_venues[i].get(CONF_DELIVERY_METHOD, DEFAULT_DELIVERY_METHOD)
-            
+                default_method = current_venues[i].get(
+                    CONF_DELIVERY_METHOD, DEFAULT_DELIVERY_METHOD
+                )
+
             venue_schema_dict[vol.Optional(f"slug_{i}", default=default_slug)] = str
-            venue_schema_dict[vol.Optional(f"delivery_method_{i}", default=default_method)] = vol.In(delivery_methods)
+            venue_schema_dict[
+                vol.Optional(f"delivery_method_{i}", default=default_method)
+            ] = vol.In(delivery_methods)
 
         venue_schema = vol.Schema(venue_schema_dict)
 

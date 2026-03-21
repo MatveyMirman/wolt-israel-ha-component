@@ -68,7 +68,10 @@ class WoltApiClient:
 
         try:
             async with self._session.get(
-                url, headers=HEADERS, params=params, timeout=aiohttp.ClientTimeout(total=10)
+                url,
+                headers=HEADERS,
+                params=params,
+                timeout=aiohttp.ClientTimeout(total=10),
             ) as response:
                 if response.status == 200:
                     data = await response.json()
@@ -118,7 +121,10 @@ class WoltApiClient:
             if method_status.get("delivery_method") == "UNAVAILABLE":
                 metadata = method_status.get("metadata", [])
                 for item in metadata:
-                    if item.get("type") == "LINK_WITH_ICON" and item.get("link") == "DELIVERY_FEE":
+                    if (
+                        item.get("type") == "LINK_WITH_ICON"
+                        and item.get("link") == "DELIVERY_FEE"
+                    ):
                         delivery_fee_formatted = item.get("value")
                         delivery_fee = self._parse_fee(delivery_fee_formatted)
 

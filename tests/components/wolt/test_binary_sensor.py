@@ -81,11 +81,11 @@ class TestWoltAvailabilitySensor:
         assert sensor._attr_device_info["via_device"] == ("wolt", "test_hub_id")
         assert sensor._attr_device_info["suggested_area"] == "Test Home"
 
-    def test_translation_key(self, mock_wolt_venue_data):
-        """Test translation_key is set."""
+    def test_attr_name(self, mock_wolt_venue_data):
+        """Test attr_name is set to display type name."""
         coordinator = MagicMock()
         coordinator.data = mock_wolt_venue_data
         coordinator.venue_config.slug = "gdb"
 
         sensor = WoltAvailabilitySensor(coordinator, "test_hub_id", "Test Home")
-        assert sensor._attr_translation_key == "availability"
+        assert sensor._attr_name == "Available"

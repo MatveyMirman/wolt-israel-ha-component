@@ -55,6 +55,24 @@ class TestWoltStatusTextSensor:
         assert sensor._attr_device_info["via_device"] == ("wolt", "test_hub_id")
         assert sensor._attr_device_info["suggested_area"] == "Test Home"
 
+    def test_attr_name(self, mock_wolt_venue_data):
+        """Test attr_name is set to display type name."""
+        coordinator = MagicMock()
+        coordinator.data = mock_wolt_venue_data
+        coordinator.venue_config.slug = "gdb"
+
+        sensor = WoltStatusTextSensor(coordinator, "test_hub_id", "Test Home")
+        assert sensor._attr_name == "Status"
+
+    def test_device_name_uses_slug_title(self):
+        """Test device name title-cases the slug."""
+        coordinator = MagicMock()
+        coordinator.data = None
+        coordinator.venue_config.slug = "marlen"
+
+        sensor = WoltStatusTextSensor(coordinator, "test_hub_id", "Test Home")
+        assert sensor._attr_device_info["name"] == "Wolt Marlen"
+
 
 class TestWoltDeliveryTimeSensor:
     """Tests for WoltDeliveryTimeSensor."""
@@ -94,6 +112,15 @@ class TestWoltDeliveryTimeSensor:
 
         sensor = WoltDeliveryTimeSensor(coordinator, "test_hub_id", "Test Home")
         assert sensor._attr_unique_id == "wolt_gdb_delivery_time"
+
+    def test_attr_name(self, mock_wolt_venue_data):
+        """Test attr_name is set to display type name."""
+        coordinator = MagicMock()
+        coordinator.data = mock_wolt_venue_data
+        coordinator.venue_config.slug = "gdb"
+
+        sensor = WoltDeliveryTimeSensor(coordinator, "test_hub_id", "Test Home")
+        assert sensor._attr_name == "Delivery Time"
 
 
 class TestWoltDeliveryFeeSensor:
@@ -145,6 +172,15 @@ class TestWoltDeliveryFeeSensor:
         sensor = WoltDeliveryFeeSensor(coordinator, "test_hub_id", "Test Home")
         assert sensor.icon == "mdi:currency-usd"
 
+    def test_attr_name(self, mock_wolt_venue_data):
+        """Test attr_name is set to display type name."""
+        coordinator = MagicMock()
+        coordinator.data = mock_wolt_venue_data
+        coordinator.venue_config.slug = "gdb"
+
+        sensor = WoltDeliveryFeeSensor(coordinator, "test_hub_id", "Test Home")
+        assert sensor._attr_name == "Delivery Fee"
+
 
 class TestWoltMinimumOrderSensor:
     """Tests for WoltMinimumOrderSensor."""
@@ -194,3 +230,21 @@ class TestWoltMinimumOrderSensor:
 
         sensor = WoltMinimumOrderSensor(coordinator, "test_hub_id", "Test Home")
         assert sensor.icon == "mdi:cart"
+
+    def test_attr_name(self, mock_wolt_venue_data):
+        """Test attr_name is set to display type name."""
+        coordinator = MagicMock()
+        coordinator.data = mock_wolt_venue_data
+        coordinator.venue_config.slug = "gdb"
+
+        sensor = WoltMinimumOrderSensor(coordinator, "test_hub_id", "Test Home")
+        assert sensor._attr_name == "Minimum Order"
+
+    def test_unique_id_has_minimum_order_suffix(self, mock_wolt_venue_data):
+        """Test unique_id includes _minimum_order suffix."""
+        coordinator = MagicMock()
+        coordinator.data = mock_wolt_venue_data
+        coordinator.venue_config.slug = "gdb"
+
+        sensor = WoltMinimumOrderSensor(coordinator, "test_hub_id", "Test Home")
+        assert sensor._attr_unique_id == "wolt_gdb_minimum_order"

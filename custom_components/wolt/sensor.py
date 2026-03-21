@@ -67,8 +67,7 @@ async def async_setup_entry(
 class WoltStatusTextSensor(CoordinatorEntity, SensorEntity):
     """Sensor for Wolt venue status text."""
 
-    _attr_has_entity_name: Final = True
-    _attr_translation_key: Final = "status_text"
+    _attr_name: Final = "Status"
 
     def __init__(
         self,
@@ -98,8 +97,7 @@ class WoltStatusTextSensor(CoordinatorEntity, SensorEntity):
 class WoltDeliveryTimeSensor(CoordinatorEntity, SensorEntity):
     """Sensor for estimated delivery time."""
 
-    _attr_has_entity_name: Final = True
-    _attr_translation_key: Final = "delivery_time"
+    _attr_name: Final = "Delivery Time"
 
     def __init__(
         self,
@@ -134,8 +132,7 @@ class WoltDeliveryTimeSensor(CoordinatorEntity, SensorEntity):
 class WoltDeliveryFeeSensor(CoordinatorEntity, SensorEntity):
     """Sensor for delivery fee."""
 
-    _attr_has_entity_name: Final = True
-    _attr_translation_key: Final = "delivery_fee"
+    _attr_name: Final = "Delivery Fee"
 
     def __init__(
         self,
@@ -179,8 +176,7 @@ class WoltDeliveryFeeSensor(CoordinatorEntity, SensorEntity):
 class WoltMinimumOrderSensor(CoordinatorEntity, SensorEntity):
     """Sensor for minimum order amount."""
 
-    _attr_has_entity_name: Final = True
-    _attr_translation_key: Final = "minimum_order"
+    _attr_name: Final = "Minimum Order"
 
     def __init__(
         self,
