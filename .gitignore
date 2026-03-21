@@ -127,3 +127,10 @@ assortment*.json
 dynamic*.json
 !dynamic-response.json
 gdb*.json
+
+
+# Home Assistant Deployment
+config/
+
+# Python linter
+.ruff_cache/

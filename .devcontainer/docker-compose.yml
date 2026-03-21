@@ -1,0 +1,20 @@
+services:
+  devcontainer:
+    image: mcr.microsoft.com/devcontainers/base:ubuntu
+    volumes:
+      - ..:/workspaces/wolt-isr-ha
+    command: sleep infinity
+
+  homeassistant:
+    image: homeassistant/home-assistant:2026.3.2
+    container_name: wolt-isr-ha
+    volumes:
+      - ../config:/config
+      - ..:/workspaces/wolt-isr-ha
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    environment:
+      - TZ=Asia/Jerusalem
+    ports:
+      - 8123:8123
+    restart: unless-stopped
