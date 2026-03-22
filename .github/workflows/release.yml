@@ -16,10 +16,21 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Get version from tag
         id: version
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Generate changelog
+        id: changelog
+        uses: orhun/git-cliff-action@v4
+        with:
+          config: .github/cliff.toml
+          args: --tag ${{ github.ref_name }} --strip header
+        env:
+          OUTPUT: changelog.md
 
       - name: Create zip file
         run: |
@@ -28,9 +39,11 @@ jobs:
           cd ..
 
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: wolt.zip
-          generate_release_notes: true
+          body: ${{ steps.changelog.outputs.content }}
+          draft: false
+          prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
