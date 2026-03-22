@@ -73,7 +73,7 @@ class WoltDataUpdateCoordinator(DataUpdateCoordinator[WoltVenueData | None]):
         )
 
         session = async_get_clientsession(hass)
-        self.api = WoltApiClient(session)
+        self.api = WoltApiClient(session, delivery_method=self._delivery_method)
 
     @property
     def hub_id(self) -> str:

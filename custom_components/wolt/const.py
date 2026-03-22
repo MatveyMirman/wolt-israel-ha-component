@@ -37,8 +37,12 @@ VENUE_CONFIG_SCHEMA = {
 DELIVERY_METHODS: Final = [
     ("homedelivery", "Home Delivery"),
     ("takeaway", "Takeaway"),
-    ("eatin", "Eat In"),
 ]
+
+METHOD_LABELS: Final = {
+    "homedelivery": "Delivery",
+    "takeaway": "Takeaway",
+}
 
 HEADERS: Final = {
     "app-language": "en",
@@ -58,5 +62,5 @@ ATTR_VENUE_ID: Final = "venue_id"
 ATTR_NEXT_OPEN: Final = "next_open"
 ATTR_NEXT_CLOSE: Final = "next_close"
 ATTR_ORDER_URL: Final = "order_url"
-ATTR_MINIMUM_ORDER: Final = "minimum_order"
-ATTR_MINIMUM_ORDER_FORMATTED: Final = "minimum_order_formatted"
+ATTR_ORDER_MINIMUM: Final = "order_minimum"
+ATTR_ORDER_MINIMUM_FORMATTED: Final = "order_minimum_formatted"

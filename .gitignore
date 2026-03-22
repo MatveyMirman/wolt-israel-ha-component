@@ -134,3 +134,6 @@ config/
 
 # Python linter
 .ruff_cache/
+
+# Wolt actual api responses
+wolt_responses/

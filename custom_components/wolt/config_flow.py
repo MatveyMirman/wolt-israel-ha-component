@@ -49,7 +49,7 @@ class WoltConfigFlow(ConfigFlow, domain=DOMAIN):
                 else:
                     hub_id = str(uuid.uuid4())
                     return self.async_create_entry(
-                        title=f"Wolt Hub - {hub_name}",
+                        title=hub_name,
                         data={
                             CONF_HUB_ID: hub_id,
                             CONF_HUB_NAME: hub_name,
@@ -67,7 +67,7 @@ class WoltConfigFlow(ConfigFlow, domain=DOMAIN):
                 else:
                     hub_id = str(uuid.uuid4())
                     return self.async_create_entry(
-                        title=f"Wolt Hub - {hub_name}",
+                        title=hub_name,
                         data={
                             CONF_HUB_ID: hub_id,
                             CONF_HUB_NAME: hub_name,
@@ -82,7 +82,7 @@ class WoltConfigFlow(ConfigFlow, domain=DOMAIN):
                     if zone["id"] == location_type:
                         hub_id = str(uuid.uuid4())
                         return self.async_create_entry(
-                            title=f"Wolt Hub - {hub_name}",
+                            title=hub_name,
                             data={
                                 CONF_HUB_ID: hub_id,
                                 CONF_HUB_NAME: hub_name,

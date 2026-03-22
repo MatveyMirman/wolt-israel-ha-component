@@ -61,7 +61,7 @@ class TestWoltConfigFlow:
         result = await flow.async_step_user(user_input)
 
         assert result["type"] == FlowResultType.CREATE_ENTRY
-        assert result["title"] == "Wolt Hub - My Home"
+        assert result["title"] == "My Home"
         assert CONF_HUB_ID in result["data"]
         assert result["data"][CONF_HUB_NAME] == "My Home"
         assert result["data"][CONF_ZONE] == "Home Assistant Home"
@@ -89,7 +89,7 @@ class TestWoltConfigFlow:
         result = await flow.async_step_user(user_input)
 
         assert result["type"] == FlowResultType.CREATE_ENTRY
-        assert result["title"] == "Wolt Hub - Office"
+        assert result["title"] == "Office"
         assert result["data"][CONF_ZONE] == "Custom Location"
         assert result["data"][CONF_LATITUDE] == 32.0667
         assert result["data"][CONF_LONGITUDE] == 34.7833

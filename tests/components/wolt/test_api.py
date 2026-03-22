@@ -21,7 +21,7 @@ class TestWoltApiClient:
     @pytest.fixture
     def api_client(self, mock_session):
         """Create an API client instance."""
-        return WoltApiClient(mock_session)
+        return WoltApiClient(mock_session, delivery_method="homedelivery")
 
     async def test_async_get_venue_dynamic_success(
         self, api_client, mock_session, mock_wolt_venue_data
@@ -51,7 +51,7 @@ class TestWoltApiClient:
                     "header": {
                         "delivery_method_statuses": [
                             {
-                                "delivery_method": "UNAVAILABLE",
+                                "delivery_method": "homedelivery",
                                 "metadata": [
                                     {
                                         "type": "LINK_WITH_ICON",
@@ -138,10 +138,103 @@ class TestWoltApiClient:
         result = api_client._parse_fee("invalid")
         assert result is None
 
-    async def test_get_delivery_method(self, api_client):
-        """Test getting delivery method."""
-        result = api_client._get_delivery_method()
-        assert result == "homedelivery"
+    async def test_parse_venue_data_integer_order_minimum(self, api_client, mock_session):
+        """Test parsing venue data when order_minimum is an integer (live API format)."""
+        mock_response = AsyncMock()
+        mock_response.status = 200
+        mock_response.json = AsyncMock(
+            return_value={
+                "venue": {
+                    "online": False,
+                    "order_minimum": 5000,
+                    "delivery_open_status": {
+                        "value": "Opens today at 12:00",
+                        "next_open": "2026-03-22T12:00:00+02:00",
+                        "next_close": "2026-03-23T00:00:00+02:00",
+                    },
+                    "delivery_configs": [
+                        {
+                            "method": "homedelivery",
+                            "estimate": {"label": "60-70 min"},
+                        }
+                    ],
+                    "header": {
+                        "delivery_method_statuses": [
+                            {
+                                "delivery_method": "homedelivery",
+                                "metadata": [
+                                    {
+                                        "type": "LINK_WITH_ICON",
+                                        "link": "DELIVERY_FEE",
+                                        "value": "₪14.00",
+                                    }
+                                ],
+                            }
+                        ]
+                    },
+                    "id": "5e6f93e9337c3135d34e1811",
+                },
+                "venue_raw": {},
+            }
+        )
+        mock_session.get.return_value.__aenter__.return_value = mock_response
+
+        result = await api_client.async_get_venue_dynamic(
+            slug="gdb",
+            lat=32.0853,
+            lon=34.7818,
+            delivery_method="homedelivery",
+        )
+
+        assert result is not None
+        assert result.online is False
+        assert result.status_text == "Opens today at 12:00"
+        assert result.delivery_time == "60-70 min"
+        assert result.minimum_order_amount == 5000
+        assert result.minimum_order_amount_formatted == "₪50.00"
+
+    async def test_parse_venue_data_delivery_method_filter(self, mock_session):
+        """Test that delivery time is filtered by configured delivery method."""
+        api_client = WoltApiClient(mock_session, delivery_method="takeaway")
+        mock_response = AsyncMock()
+        mock_response.status = 200
+        mock_response.json = AsyncMock(
+            return_value={
+                "venue": {
+                    "online": True,
+                    "order_minimum": 5000,
+                    "delivery_open_status": {
+                        "value": "Open",
+                        "next_open": None,
+                        "next_close": None,
+                    },
+                    "delivery_configs": [
+                        {
+                            "method": "homedelivery",
+                            "estimate": {"label": "60-70 min"},
+                        },
+                        {
+                            "method": "takeaway",
+                            "estimate": {"label": "15-20 min"},
+                        },
+                    ],
+                    "header": {},
+                    "id": "venue_123",
+                },
+                "venue_raw": {},
+            }
+        )
+        mock_session.get.return_value.__aenter__.return_value = mock_response
+
+        result = await api_client.async_get_venue_dynamic(
+            slug="gdb",
+            lat=32.0853,
+            lon=34.7818,
+            delivery_method="takeaway",
+        )
+
+        assert result is not None
+        assert result.delivery_time == "15-20 min"
 
 
 class TestWoltVenueData:

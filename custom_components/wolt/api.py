@@ -37,9 +37,12 @@ class WoltVenueData:
 class WoltApiClient:
     """Client for interacting with Wolt API."""
 
-    def __init__(self, session: aiohttp.ClientSession) -> None:
+    def __init__(
+        self, session: aiohttp.ClientSession, delivery_method: str = "homedelivery"
+    ) -> None:
         """Initialize the API client."""
         self._session = session
+        self._delivery_method = delivery_method
 
     async def async_get_venue_dynamic(
         self,
@@ -75,7 +78,7 @@ class WoltApiClient:
             ) as response:
                 if response.status == 200:
                     data = await response.json()
-                    return self._parse_venue_data(data)
+                    return self._parse_venue_data(data, delivery_method)
                 _LOGGER.warning(
                     "Wolt API returned status %s for venue %s", response.status, slug
                 )
@@ -87,7 +90,9 @@ class WoltApiClient:
             _LOGGER.error("Unexpected error fetching Wolt venue data: %s", err)
             return None
 
-    def _parse_venue_data(self, data: dict[str, Any]) -> WoltVenueData:
+    def _parse_venue_data(
+        self, data: dict[str, Any], delivery_method: str
+    ) -> WoltVenueData:
         """Parse API response into WoltVenueData.
 
         Args:
@@ -108,7 +113,7 @@ class WoltApiClient:
         delivery_configs = venue.get("delivery_configs", [])
         delivery_time = None
         for config in delivery_configs:
-            if config.get("method") == self._get_delivery_method():
+            if config.get("method") == delivery_method:
                 estimate = config.get("estimate", {})
                 delivery_time = estimate.get("label")
                 break
@@ -118,7 +123,7 @@ class WoltApiClient:
         header = venue.get("header", {})
         method_statuses = header.get("delivery_method_statuses", [])
         for method_status in method_statuses:
-            if method_status.get("delivery_method") == "UNAVAILABLE":
+            if method_status.get("delivery_method") == delivery_method:
                 metadata = method_status.get("metadata", [])
                 for item in metadata:
                     if (
@@ -127,15 +132,21 @@ class WoltApiClient:
                     ):
                         delivery_fee_formatted = item.get("value")
                         delivery_fee = self._parse_fee(delivery_fee_formatted)
+                        break
+                break
 
-        minimum_order_amount = None
-        minimum_order_amount_formatted = None
+        minimum_order_amount: int | None = None
+        minimum_order_amount_formatted: str | None = None
         order_minimum = venue.get("order_minimum")
-        if order_minimum:
-            minimum_order_amount_formatted = order_minimum.get("formatted")
-            amount = order_minimum.get("amount")
-            if amount:
-                minimum_order_amount = int(amount)
+        if order_minimum is not None:
+            if isinstance(order_minimum, int):
+                minimum_order_amount = order_minimum
+                minimum_order_amount_formatted = f"₪{order_minimum / 100:.2f}"
+            elif isinstance(order_minimum, dict):
+                minimum_order_amount_formatted = order_minimum.get("formatted")
+                amount = order_minimum.get("amount")
+                if amount:
+                    minimum_order_amount = int(amount)
 
         return WoltVenueData(
             online=online,
@@ -150,10 +161,6 @@ class WoltApiClient:
             minimum_order_amount_formatted=minimum_order_amount_formatted,
             raw_data=data,
         )
-
-    def _get_delivery_method(self) -> str:
-        """Get the configured delivery method."""
-        return "homedelivery"
 
     def _parse_fee(self, formatted: str | None) -> int | None:
         """Parse delivery fee from formatted string.

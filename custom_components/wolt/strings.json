@@ -57,8 +57,8 @@
                 "name": "Delivery Fee",
                 "description": "Delivery fee amount"
             },
-            "minimum_order": {
-                "name": "Minimum Order",
+            "order_minimum": {
+                "name": "Order Minimum",
                 "description": "Minimum order amount"
             }
         },
